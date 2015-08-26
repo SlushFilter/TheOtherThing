@@ -1,0 +1,184 @@
+Dev Notes !
+
+Ludum Dare 33: You are the Monster!
+GAME: You are "the thing". You kill people and absorb their knowledge. You are not all-powerful, so you need to keep people from figuring out what you are.owerful, so you need to keep people from figuring out what you are.
+
+Dialog trees
+\/  \/  \/
+ \  /   /
+  \/   /
+   \  /
+    \/
+	 |
+	 |
+	 |
+	 
+Game ideas:
+The Thing: You kill people and take their persona and knowledge. Use it to get info to help you escape the level before people figure out you're the THING. Or just kill them all. Designed levels.
+
+
+The Thing (John Carpenter)
+
+Stealth game where you are the THING. Kind of
+like 1p version of Mafia?
+
+Style : 
+
+-== Notes =======================================================================-
+
+BASIC ELEMENTS : 
+
+* Attack
+* Assimilation
+* Dialog System
+* EXIT
+
+Controls 
+	- Keyboard / Gamepad (configurable)
+	- Move up down left right
+	- Context Action button (talk, search)
+	- Attack
+	- JUMP!
+Move
+Maps
+	32x32 tiles
+	two kinds of 'placement' - 
+		walls - render in front of Entity when entity.y < wall.y
+		floor - always render behind entities
+	
+Health Meter
+Suspicion Meter
+Talk
+
+
+
+Setting / Game World:
+	NEED -----
+		Storyline
+		Military / Science base!
+		2D Top Down
+		Monkey Island Easter eggs! 
+	WANT -----
+		Level intermission - Line of everyone on the level, sonic the hedgehog throwback, with people dying (who died in the level) and
+		those who did not die run away like little boys and/or girls <-- not sexist,  funny ultra hilarious
+
+Look / Feel : 16 bitish - 4 directinal sprites 
+SCREEN SIZE ? 640x480
+
+The Thing ? Squilchy squashy blobby squelch ... thing.
+- Animation frames, only need one set though :)
+
+Paper Doll these :
+	Scientists
+	Cooks
+	Security
+	Military Guys
+	Red shirts (janitors)
+
+Actual In Game Magazing : 
+Science-Tits  WEEKLY (scientists love this one)
+Bigg Buts! (Magazine about HUGE EXCEPTIONS! )
+
+NPC's : 
+Iriquois - Grumpy truck driver found pouring an infinate cup of coffee on a chess computer (also has bandanna)
+
+Mechanics :
+	NEED ----- 
+		Suspicion Meter - Gauges the overall suspicion of the general population. If it gets too high [SOMETHING] happens.
+			Cooldown your suspicion by [DOING SOMTHING].
+			
+			Suspicion meter is a segmented bar with each segment representing one NPC on the current level.
+			
+			As the number of NPC's decreases, so does the size of the Suspicion meter. Making things seem more suspicious quicker.
+			
+		Dialog elements
+			Preferences ? 
+			Random-like dialogs - ie; the level with the mess hall will talk about food sometimes.
+			the level with the bunks will talk about bigg buts magazine ALL OF THE TIME .. I mean everyone ... even the chicks.
+			multiple choice ?
+			ALWAYS A "D" ANSWER!
+			
+		Decision trees
+		
+		NPC Personality :
+			Affects what conversation and behaviors the NPC exhibits.
+			
+		NPC Knowledge / Job :
+			This determines what abilities you inherit when becoming that person.
+			eg; Access to security doors would require you to assimilate that person.
+			
+		THING Knowledge :
+			A list of clues and information you collect through various means throughout the game.
+			
+	WANT -----
+		Assimilation of animals: Rats, Dogs, Awful awful monkeys
+		Scripted events.
+Combat :
+	
+	NEED ----- 
+		"THING" ability - Occurs on killing an NPC, you become them after they die.
+		Only one form at a time, and no backseeees.
+	WANT -----
+		Melee
+		Firearms
+
+
+
+
+
+
+
+Events : 
+
+
+
+
+
+Resource links:
+
+The GIMP 
+
+
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Components
+
+KeboardControl - Raises MoveMob, Act, and Attack actions.
+
+Mobile - Responds to MobMove events by setting
+
+Velocity - Updates XY coords every frame, adds a 'vel' component to the entity which is a vector
+	describing the ents velocity
+
+Facing - 
+
+TakesDamage - Defines something that can take damage, and potentially die. To deal damage to something, 
+	you must pass a damageInfo object with the format of: { source:entity, damage:number }
+	Fires a Die event when health drops below zero. The die event shoudl forward on the damageInfo object.
+
+Events
+
+MobMove - Move command for a mob, passes the following argument object:
+		data {
+			state : boolean // True to start move False to stop move
+			dir   : number // Direction to move (See LD33.CONST.BEARING in ld33.namespace.js )
+		}
+MobStop - Stop Moving command for a mob. No arguments.
+
+Act - Used for commanding ents to Act (No args)
+
+Attack - Used for commanding ents to attack (No args)
+
+Jump - Used for commanding ents to jump (No Args)
+
+Turn - Used for signaling a change in bearing ... only one arg that describes what the new bearing is. ( uses LD33.CONST.BEARING for values )
+
+Die - Event that fires when HP drops below 0
+
+ToggleGameActuation - Pauses or unpauses the game.
+
+ToggleControl  - Global event to disable/enable the controllable component
+
+

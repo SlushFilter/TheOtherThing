@@ -1,0 +1,3 @@
+Change Log
+08.26.15 --
+Added the AI component into ld33.components.js ... and commented it :)
