@@ -104,7 +104,7 @@ Crafty.c("NPCAnimationController", {
 		this._animationControllerBearing = LD33.CONST.BEARING.DOWN;
 		this.bind("Turn", this._animationControllerTurn);
 		this.bind("MobMove", this._animationControllerMobMove);
-		this.bind("MobIdle", this._animationControllerMobIdle);
+		this.bind("MobStop", this._animationControllerMobStop);
 		this.bind("Die", this._animationControllerDie);
 		
 	} ,
@@ -140,7 +140,7 @@ Crafty.c("NPCAnimationController", {
 		}
 		this._animationControllerUpdate();
 	},
-    _animationControllerMobIdle : function() {
+    _animationControllerMobStop : function() {
 		this._animationControllerAction = "IDLE";
 		this._animationControllerUpdate();
     },
