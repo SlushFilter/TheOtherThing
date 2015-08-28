@@ -8,31 +8,54 @@ Crafty.c("Selectionable", {
 	SELECTION_DOWN: Crafty.keys.DOWN_ARROW,
 	SELECTION_EXECUTE: Crafty.keys.ENTER,
 	
-	SELECTION_OBJECTS_ARRAY: [], // This holds the full objects.
-	SELECTION_TEXT_ARRAY: [], // This just holds the text entities.
-	SELECTION_CURRENT: 0,
-	SELECTION_MAX: 3, // Need to dynamically load this from object?
+	selection_objects_array: [], // This holds the full objects.
+	selection_text_array: [], // This just holds the text entities.
+	selection_current: 0,
+	selection_max: 3, // Need to dynamically load this from object?
 	
 	
 	init: function(){
 		this.requires("Thing, Menu");
-		this.bind("KeyDown", function(keypress){ // Need to unbind on destroy
+		
+		this.bind("SelectionUp", function(){
+			if(this.selection_current > 0){
+				this.selection_current--;
+			} else {
+				this.selection_current = this.selection_max;
+			};
+			Crafty.audio.play("select_sound");
+			this.redrawSelectionText();
+		});
+		this.bind("SelectionDown", function(){
+			if(this.selection_current < this.selection_max){
+				this.selection_current++;
+			} else {
+				this.selection_current = 0;
+			};
+			Crafty.audio.play("select_sound");
+			this.redrawSelectionText();
+		});
+		this.bind("SelectionExecute", function(){
+			this.selection_objects_array[this.selection_current].actionExecute(this);
+		});
+		
+		this.bind("KeyDown", function(keypress){
 			if (keypress.key === this.SELECTION_UP){
 				// Move the selection indicator up.
-				if(this.SELECTION_CURRENT > 0){
-					this.SELECTION_CURRENT--;
+				if(this.selection_current > 0){
+					this.selection_current--;
 				} else {
-					this.SELECTION_CURRENT = this.SELECTION_MAX;
+					this.selection_current = this.selection_max;
 				};
 				Crafty.audio.play("select_sound");
 				this.redrawSelectionText();
 			}
 			if (keypress.key === this.SELECTION_DOWN){
 				// Move the selection indicator down.
-				if(this.SELECTION_CURRENT < this.SELECTION_MAX){
-					this.SELECTION_CURRENT++;
+				if(this.selection_current < this.selection_max){
+					this.selection_current++;
 				} else {
-					this.SELECTION_CURRENT = 0;
+					this.selection_current = 0;
 				};
 				Crafty.audio.play("select_sound");
 				this.redrawSelectionText();
@@ -41,26 +64,27 @@ Crafty.c("Selectionable", {
 				Crafty.audio.play("selection_execute_sound");
 				// Check for dialog exit.
 				// Load next dialog.
-				if(this.SELECTION_OBJECTS_ARRAY[this.SELECTION_CURRENT].RESULT === 2){
+				// if(this.selection_objects_array[this.selection_current].RESULT === 2){
 					// Exit the conversation.
-					this.destroy();
-				} else if (this.SELECTION_OBJECTS_ARRAY[this.SELECTION_CURRENT].RESULT === 1){
+					// this.destroy();
+				// } else if (this.selection_objects_array[this.selection_current].RESULT === 1){
 					// Increase suspicion level.
-					this.nextDialog(this.SELECTION_OBJECTS_ARRAY[this.SELECTION_CURRENT].NEXT_DIALOG);
-				} else if (this.SELECTION_OBJECTS_ARRAY[this.SELECTION_CURRENT].RESULT === 0){
+					// this.nextDialog(this.selection_objects_array[this.selection_current].NEXT_DIALOG);
+				// } else if (this.selection_objects_array[this.selection_current].RESULT === 0){
 					// A 0 result means you move to the NEXT_DIALOG node.
-					this.nextDialog(this.SELECTION_OBJECTS_ARRAY[this.SELECTION_CURRENT].NEXT_DIALOG);
-				} else if (this.SELECTION_OBJECTS_ARRAY[this.SELECTION_CURRENT].RESULT === -1) {
+					// this.nextDialog(this.selection_objects_array[this.selection_current].NEXT_DIALOG);
+				// } else if (this.selection_objects_array[this.selection_current].RESULT === -1) {
 					// Decrease suspicion level.
-					this.nextDialog(this.SELECTION_OBJECTS_ARRAY[this.SELECTION_CURRENT].NEXT_DIALOG);
-				} else if (this.SELECTION_OBJECTS_ARRAY[this.SELECTION_CURRENT].RESULT === -2) {
+					// this.nextDialog(this.selection_objects_array[this.selection_current].NEXT_DIALOG);
+				// } else if (this.selection_objects_array[this.selection_current].RESULT === -2) {
 					// He fell for it! ASSIMILATE!
-					console.log("ASSIMILATE HIM!");
-					LD33.ENTS.Assimilate(this.talker);
-					this.talker.think = LD33.ENTS.AI_BrainDead;
-					this.assimilating = true;
-					this.destroy();
-				};
+					// console.log("ASSIMILATE HIM!");
+					// LD33.ENTS.Assimilate(this.talker);
+					// this.talker.think = LD33.ENTS.AI_BrainDead;
+					// this.assimilating = true;
+					// this.destroy();
+				// };
+				this.selection_objects_array[this.selection_current].actionExecute(this);
 			}
 		});
 	},
@@ -68,7 +92,7 @@ Crafty.c("Selectionable", {
 	// Load the selectionables.
 	loadSelectionText: function(text_objects_array){
 		for(var i = 0; i < text_objects_array.length; i++){
-			this.SELECTION_OBJECTS_ARRAY.push(text_objects_array[i]);
+			this.selection_objects_array.push(text_objects_array[i]);
 			this.temp_text = Crafty.e("2D, DOM, Text")
 				.attr({
 					x: this.menu.x + (this.menu.w / 2) - 150,
@@ -77,38 +101,38 @@ Crafty.c("Selectionable", {
 					})
 				.text(text_objects_array[i].SELECTION_TEXT)
 				.textColor('white');
-			if(i === this.SELECTION_CURRENT){
+			if(i === this.selection_current){
 				this.temp_text.textFont({
 					weight: 'bold',
 				}).textColor('green');
 				this.cursor.x = this.temp_text.x - 10;
 				this.cursor.y = this.temp_text.y;
 			};
-			this.SELECTION_TEXT_ARRAY.push(this.temp_text);
+			this.selection_text_array.push(this.temp_text);
 			this.attach(this.temp_text);
 		};
-		this.SELECTION_MAX = this.SELECTION_TEXT_ARRAY.length - 1;
+		this.selection_max = this.selection_text_array.length - 1;
 	},
 	
 	// Call this before loading a new set of selectionables.
 	clearSelectionText: function(){
-		for(var i = 0; i < this.SELECTION_TEXT_ARRAY.length; i++){
-			this.SELECTION_TEXT_ARRAY[i].destroy();
+		for(var i = 0; i < this.selection_text_array.length; i++){
+			this.selection_text_array[i].destroy();
 		};
-		this.SELECTION_TEXT_ARRAY = [];
-		this.SELECTION_OBJECTS_ARRAY = [];
+		this.selection_text_array = [];
+		this.selection_objects_array = [];
 	},
 	
 	// Call this for the initial draw and on relevant keypresses to change the "highlighted" text.
 	redrawSelectionText: function() {
 		// Display selectable options.
-		for(var i = 0; i < this.SELECTION_TEXT_ARRAY.length; i++){
-			if(i === this.SELECTION_CURRENT){
-				this.SELECTION_TEXT_ARRAY[i].textColor('green').textFont({ weight: 'bold' });
-				this.cursor.x = this.SELECTION_TEXT_ARRAY[i].x - 10;
-				this.cursor.y = this.SELECTION_TEXT_ARRAY[i].y;
+		for(var i = 0; i < this.selection_text_array.length; i++){
+			if(i === this.selection_current){
+				this.selection_text_array[i].textColor('green').textFont({ weight: 'bold' });
+				this.cursor.x = this.selection_text_array[i].x - 10;
+				this.cursor.y = this.selection_text_array[i].y;
 			} else {
-				this.SELECTION_TEXT_ARRAY[i].textColor('white').textFont({ weight: 'normal' });
+				this.selection_text_array[i].textColor('white').textFont({ weight: 'normal' });
 			};
 		};
 	},
