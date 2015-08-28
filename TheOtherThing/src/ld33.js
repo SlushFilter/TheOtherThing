@@ -4,7 +4,7 @@
 // TODO: 
 //		- Add "scenes": map, menu, dialog?, cutscene?
 
-var debug = true;
+var debug = false;
 
 // Method to load resources, initialize Crafty
 function loadFunc() {
