@@ -160,6 +160,8 @@ TakesDamage - Defines something that can take damage, and potentially die. To de
 
 Events
 
+CollisionSolid - Thrown when the entity collides with something solid.
+
 MobMove - Move command for a mob, passes the following argument object:
 		data {
 			state : boolean // True to start move False to stop move
@@ -181,4 +183,6 @@ ToggleGameActuation - Pauses or unpauses the game.
 
 ToggleControl  - Global event to disable/enable the controllable component
 
-
+SelectionUp - Used for selecting the previous menu option
+SelectionDown  - Used for selecting the next menu option.
+SelectionExecute - Used for executing the selected menu option.

@@ -4,43 +4,33 @@ LD33.ENTS.CreateHud = function() {
 	hud.attach(hudText);
 }
 
-LD33.ENTS.AI_BrainDead = function() {
-	
-};
+Crafty.c("AI_BrainDead", {
+	init : function() {
+		this.requires("AI");
+		this.aiSetThink(function() { }); // Derp Im Braindead
+	}
+});
 
-LD33.ENTS.AI_Wander = function() {
-    // Pick a random direction ...
-    console.log("AI_Wander");
-    var bearing = Crafty.math.randomInt(0, 7);
-    if(bearing >= LD33.CONST.BEARING.NONE)  { // Causes the mob to idle.
-        //this.trigger("MobIdle");
-    } else { // Otherwise make the mob move in a direction.
-        this.trigger("MobIdle");
-        this.trigger("MobMove", { state:true, dir:bearing });
-    }
-};
-
-/* Deprecated - Old wander function.
-LD33.ENTS.AI_Wander = function() { 
-	this.currentAction = "WALK";
-	var dx = Crafty.math.randomInt(-1, 1);
-	var dy = 0;
-	if(dx === 0) {
-		var dy = Crafty.math.randomInt(-1, 1);
+Crafty.c("AI_Wander", {
+	init : function() {
+		this.requires("AI");
+        this.aiSetThink(this._AI_Wander);
+		this.bind("CollisionSolid", this._handleCollisionSolid);
+	} ,
+	// Behavior when running into a wall.
+	_handleCollisionSolid : function(hit) { 
+		this.trigger("MobStop");
+	} ,
+	_AI_Wander : function() {
+		var bearing = Crafty.math.randomInt(0, 7);
+		if(bearing >= LD33.CONST.BEARING.NONE)  { // Causes the mob to idle.
+			this.trigger("MobStop");
+		} else { // Otherwise make the mob move in a direction.
+			this.trigger("MobIdle");
+			this.trigger("MobMove", { state:true, args:bearing });
+		}
 	}
-	if(dy < 0) { 
-		this.turn("UP");
-	} else if (dy > 0) {
-		this.turn("DOWN");
-	}
-	if(dx < 0) {
-		this.turn("LEFT");
-	} else if (dx > 0) {
-		this.turn("RIGHT");
-	}
-	this.vx = (dx * this.walkspeed);
-	this.vy = (dy * this.walkspeed);
-};*/
+});
 
 LD33.ENTS.Assimilate = function(target) {
 	var player = Crafty("Feeler");
@@ -61,18 +51,6 @@ LD33.ENTS.Assimilate = function(target) {
 	});
 };
 
-Crafty.c("Tile", {
-	init: function() {
-		this.addComponent("Thing"); 
-	},
-	setTile : function(tileIndex) {
-		var x = tileIndex % 20; // 640 / 32
-		var y = (tileIndex / 20) | 0; // 640 / 32
-		this.sprite(x, y, 0);
-		return this;
-	}
-});
-
 LD33.SpawnCorpse = function(spriteSheet, x, y) {
 	Crafty.e("2D, Canvas, " + spriteSheet).attr( { x:x, y:y, z:-10 } ).animate("DIE");
 };
@@ -85,10 +63,9 @@ Crafty.c("NonPlayerCharacter", {
 
 Crafty.c("NewScientist", {
 	init : function() {
-		this.requires("NonPlayerCharacter, AI, SCIENTIST_SPRITE");
-        this.aiSetThink(LD33.ENTS.AI_Wander);
+		this.requires("NonPlayerCharacter, AI_Wander, SCIENTIST_SPRITE");
         this.setBearing(LD33.CONST.BEARING.DOWN);
-	}
+	} ,
 });
 
 /////////////////////////////////////////

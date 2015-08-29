@@ -94,115 +94,12 @@ Crafty.c("Feeler", {
 	}
 });
 
-Crafty.c("Turnable", {
-	// For things that can turn.
-	facing : "DOWN",
-	init : function() { },
-	turn : function(direction) {
-		facing = direction;
-		this.trigger("TurnOld", direction);
-	}
-});
-
-Crafty.c("Controllable", {
-	move_left: Crafty.keys.LEFT_ARROW,
-	move_right:  Crafty.keys.RIGHT_ARROW,
-	move_up:  Crafty.keys.UP_ARROW,
-	move_down: Crafty.keys.DOWN_ARROW,
-	probe_button : Crafty.keys.ENTER, // For testing
-	attack_button : Crafty.keys.Z,
-	talk_button: Crafty.keys.X,
-	jump: Crafty.keys.SPACE,
-	
-	moveSpeed : 0.1,
-	enabled: true,
-	
-	init: function() {
-		this.requires("Thing, Mobile, Feeler, Turnable");
-		
-		this.bind('KeyDown', function(keypress) {
-			if(debug) {
-				console.log("Key Pressed: " + keypress.key);
-			};
-			if(keypress.key === Crafty.keys.CAPS && debug){
-				Crafty.trigger("ToggleControl");
-			};
-			if (!this.enabled) { return; }; // Don't do stuff when you're not supposed to.
-			if(keypress.key === this.move_left){
-				this.vx = -this.moveSpeed;
-				this.facing = "LEFT";
-			} else if (keypress.key === this.move_right){
-				this.vx = this.moveSpeed;
-				this.facing = "RIGHT";
-			} else if (keypress.key === this.move_up){
-				this.vy = -this.moveSpeed;
-				this.facing = "UP";
-			} else if (keypress.key === this.move_down){
-				this.vy = this.moveSpeed;
-				this.facing = "DOWN";
-			} else if (keypress.key === this.probe_button) {
-				this.feelerHitBox.action = "ACTUALIZE";
-				this.probe();
-			} else if (keypress.key === this.attack_button) {
-				this.feelerHitBox.action = "ATTACK";
-				this.probe();
-			} else if (keypress.key === this.talk_button && debug) {
-				console.log("Talking");
-				Crafty.e("Menu").loadDialog(LD33.DATA.DIALOG.DIALOG_PLACEHOLDER);
-			}
-		});
-		this.bind('KeyUp', function(keypress) {
-			//console.log("Key Released: " + keypress.key);
-			if (!this.enabled) { return; }; // Do stuff when you're supposed to.
-			if(keypress.key === this.move_left){
-				if(this.vx < 0) { this.vx = 0; }
-			} else if (keypress.key === this.move_right){
-				if(this.vx > 0) { this.vx = 0; }
-			} else if (keypress.key === this.move_up){
-				if(this.vy < 0) { this.vy = 0; }
-			} else if (keypress.key === this.move_down){
-				if(this.vy > 0) { this.vy = 0; }
-			} else if (keypress.key === this.probe_button
-			|| keypress.key === this.attack_button) {
-				this.stopProbing();
-			}
-		});
-		this.bind('ToggleControl', function() {
-		// TODO: Fix bug where Jonesy keeps moving if in motion when this is called.
-			if(this.enabled){
-				console.log("Unbinding movement controls.");
-				this.movH = 0;
-				this.movV = 0;
-				this.unbind('EventFrame', this.handleMove);
-			} else {
-				console.log("Rebindnig movement controls.");
-				this.bind('EventFrame', this.handleMove);
-			};
-			this.enabled = !this.enabled;
-		});
-	},
-});
-
 Crafty.c("Solid", {
 	init: function() {
 		this.requires("Collision");
 		this.collision();
 	}
 });
-
-Crafty.c("FloorTile", {
-	init: function() {
-		this.addComponent("Thing"); 
-	}
-});
-
-Crafty.c("Block", {
-	init: function() {
-		this.addComponent("Solid, Collision");
-	}
-	// Define hitbox on entity creation.
-});
-
 
 Crafty.c("ExitBlock", {
 	init: function() {
@@ -217,12 +114,6 @@ Crafty.c("ExitBlock", {
 	finishGame: function() {
 		// Call this to load the end game screen.
 	}
-});
-
-Crafty.c("Talkative", {  // Unused so far. Maybe this is the component required for entities to be able to talk.
-	init: function(){
-	},
-	dialogChoices: [], // Array of objects.
 });
 
 Crafty.c("Selectionable", {
@@ -544,15 +435,23 @@ Crafty.c("KeyboardControl", {
 		this.bind('KeyUp', this.handleKeyUp);
 		// Not sure how this is going to behave on toggle control.
 		this.bind('ToggleControl', this.handleToggleControl);
-        
-        this.keystate = [
-            { key:Crafty.keys.UP_ARROW,    event:"MobMove", state:false, dir: LD33.CONST.BEARING.UP },	
-            { key:Crafty.keys.DOWN_ARROW,  event:"MobMove", state:false, dir: LD33.CONST.BEARING.DOWN },  
-            { key:Crafty.keys.LEFT_ARROW,  event:"MobMove", state:false, dir: LD33.CONST.BEARING.LEFT },  
-            { key:Crafty.keys.RIGHT_ARROW, event:"MobMove", state:false, dir: LD33.CONST.BEARING.RIGHT }, 
-            { key:Crafty.keys.ENTER,       event:"Act",     state:false, dir:null},
-            { key:Crafty.keys.Z,           event:"Attack",  state:false, dir:null},
-            { key:Crafty.keys.SPACE,       event:"Jump",    state:false, dir:null}
+		
+		// Auxillary keystate setup for throwing menu selection events.
+        this.auxKeyState = [
+            { key:Crafty.keys.UP_ARROW,    event:"SelectionUp", 	 state:false, args: null },	
+            { key:Crafty.keys.DOWN_ARROW,  event:"SelectionDown", 	 state:false, args: null },  
+            { key:Crafty.keys.ENTER,       event:"SelectionExecute", state:false, args: null},
+		];
+		
+		// Default keystate, setup for throwing Mob controls.
+        this.keyState = [
+            { key:Crafty.keys.UP_ARROW,    event:"MobMove", state:false, args: LD33.CONST.BEARING.UP },	
+            { key:Crafty.keys.DOWN_ARROW,  event:"MobMove", state:false, args: LD33.CONST.BEARING.DOWN },  
+            { key:Crafty.keys.LEFT_ARROW,  event:"MobMove", state:false, args: LD33.CONST.BEARING.LEFT },  
+            { key:Crafty.keys.RIGHT_ARROW, event:"MobMove", state:false, args: LD33.CONST.BEARING.RIGHT }, 
+            { key:Crafty.keys.ENTER,       event:"Act",     state:false, args: null},
+            { key:Crafty.keys.Z,           event:"Attack",  state:false, args: null},
+            { key:Crafty.keys.SPACE,       event:"Jump",    state:false, args: null}
         ];
 	},
 	handleKeyDown : function(keyPress) {
@@ -563,36 +462,36 @@ Crafty.c("KeyboardControl", {
         // Don't do stuff when you're not supposed to.
 		if (!this.enabled) { console.log(this.enabled); return; }; 
 		
-		for(var i = 0; i < this.keystate.length; i++) {
-			if(keyPress.key === this.keystate[i].key) {
-				this.keystate[i].state = true;
-				this.trigger(this.keystate[i].event, this.keystate[i]);
+		for(var i = 0; i < this.keyState.length; i++) {
+			if(keyPress.key === this.keyState[i].key) {
+				this.keyState[i].state = true;
+				this.trigger(this.keyState[i].event, this.keyState[i]);
                 return;
 			}
 		}
 	},
 	handleKeyUp : function(keyPress) {
-		for(var i = 0; i < this.keystate.length; i++) {
-			if(keyPress.key === this.keystate[i].key) {
-				this.keystate[i].state = false;
-				this.trigger(this.keystate[i].event, this.keystate[i]);
+		for(var i = 0; i < this.keyState.length; i++) {
+			if(keyPress.key === this.keyState[i].key) {
+				this.keyState[i].state = false;
+				this.trigger(this.keyState[i].event, this.keyState[i]);
                 return;
 			}
 		}
 	},
 	handleToggleControl : function() {
-		if(this.enabled){
-			console.log("Unbinding 'handleMove' from 'EnterFrame'.");
-			// Unpress all keys.
-			for(var i = 0; i < this.keystate.length; i++) {
-				keyDef = this.keystate[i];
-				if(keyDef.state === true) {
-					keyDef.state = false;
-					this.trigger(keyDef.event, {on:false, dir:keyDef.dir});
-				}
+		// Clear the current keystate array.
+		for(var i = 0; i < this.keyState.length; i++) {
+			keyDef = this.keyState[i];
+			if(keyDef.state === true) {
+				keyDef.state = false;
+				this.trigger(keyDef.event, { on:false, args:keyDef.args} );
 			}
 		}
-		this.enabled = !this.enabled;
+		// Swap out the keystate with the auxKeyState
+		var swap = this.keyState;
+		this.keyState = this.auxKeyState;
+		this.auxKeyState = swap;
 	}
 });
 
@@ -632,16 +531,16 @@ Crafty.c("Mobile", {
             { s:0, n: 1 }  // LD33.CONST.BEARING.RIGHT
         ];
 		this.bind("MobMove", this._mobileHandleMobMove);
-        this.bind("MobIdle", this._mobileHandleMobIdle);
+        this.bind("MobStop", this._mobileHandleMobStop);
 	} ,
     _mobileHandleMobStop : function() {
     } ,
     // Handle a MobMove command
     _mobileHandleMobMove : function(data) {
-        console.log(data.dir);
         // Update the move registers.
-        var impulseReg = this._mobileImpulse[data.dir];
-		var dir = data.dir;
+        var impulseReg = this._mobileImpulse[data.args];
+		var dir = data.args;
+		
         if(data.state === true) {
             this._mobileImpulse[dir].s = this._mobileImpulse[dir].n * this.mobileSpeed;
         } else {
@@ -663,7 +562,7 @@ Crafty.c("Mobile", {
 		}
 		this.setBearing(dir);
     },
-    _mobileHandleMobIdle : function() {
+    _mobileHandleMobStop : function() {
         this.vel.x = 0;
         this.vel.y = 0;
         for(var i = 0; i < this._mobileImpulse.length; i++) {
@@ -717,6 +616,7 @@ Crafty.c("CollidesWithSolid", {
 				this.x = hit[i].obj.x - this.w;
 			}
 		}
+		this.trigger("CollisionSolid");
 	}
 });
 
