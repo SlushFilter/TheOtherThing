@@ -99,7 +99,7 @@ Crafty.c("Selectionable", {
 					y: ((i+1) * 25) + this.primaryTextY + this.primary_text.h,
 					w: this.text_width
 					})
-				.text(text_objects_array[i].SELECTION_TEXT)
+				.text(text_objects_array[i].selection_text)
 				.textColor('white');
 			if(i === this.selection_current){
 				this.temp_text.textFont({
@@ -167,8 +167,6 @@ Crafty.c("Menu", {
 		this.cursor = Crafty.e("MenuSelector");
 		this.attach(this.cursor);
 		
-		// Display primary text on screen. x and y should be functions of the MenuBackground entity, width should be fixed.
-		
 		this.primaryTextY = this.menu.y + (this.menu.h * 0.25); // For testing, will move.
 		
 		this.nextDialog(0);
@@ -190,7 +188,7 @@ Crafty.c("Menu", {
 		this.primary_text = Crafty.e("2D, DOM, Text")
 			.attr( { x: this.menu.x + (this.menu.w / 2) - (this.text_width / 2), 
 					 y: this.primaryTextY, w: this.text_width} )
-			.text(this.dialog_tree[next_index].TEXT)
+			.text(this.dialog_tree[next_index].challenge_text)
 			.textColor('white'); 
 		
 		// Should this be a child of the bacground entity? Would that destroy all text when we destroy the background entity?
@@ -199,7 +197,7 @@ Crafty.c("Menu", {
 		this.attach(this.primary_text);
 		
 		// Display selectable options.
-		this.loadSelectionText(this.dialog_tree[next_index].SELECTIONS);
+		this.loadSelectionText(this.dialog_tree[next_index].selections);
 	},
 	
 });
