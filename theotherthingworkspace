@@ -1,0 +1,48 @@
+<NotepadPlus>
+    <Project name="TheOtherThing">
+        <Folder name="gfx">
+            <File name="TheOtherThing\gfx\instruction_screen.png" />
+            <File name="TheOtherThing\gfx\instruction_screen.xcf" />
+            <File name="TheOtherThing\gfx\jones.png" />
+            <File name="TheOtherThing\gfx\mockup.png" />
+            <File name="TheOtherThing\gfx\placeholder_jones.png" />
+            <File name="TheOtherThing\gfx\placeholder_sprite.png" />
+            <File name="TheOtherThing\gfx\scientist.png" />
+            <File name="TheOtherThing\gfx\temp_human.png" />
+            <File name="TheOtherThing\gfx\tileset.png" />
+            <File name="TheOtherThing\gfx\title_1.png" />
+            <File name="TheOtherThing\gfx\title_1.xcf" />
+        </Folder>
+        <Folder name="lib">
+            <File name="TheOtherThing\lib\crafty.js" />
+        </Folder>
+        <Folder name="sfx">
+            <File name="TheOtherThing\sfx\ba_wong_sound.wav" />
+            <File name="TheOtherThing\sfx\bwoop_sound.wav" />
+            <File name="TheOtherThing\sfx\di_ling_sound.wav" />
+            <File name="TheOtherThing\sfx\select_sound.wav" />
+        </Folder>
+        <Folder name="src">
+            <File name="TheOtherThing\src\ld33.components.js" />
+            <File name="TheOtherThing\src\ld33.data.dialog.js" />
+            <File name="TheOtherThing\src\ld33.data.map.js" />
+            <File name="TheOtherThing\src\ld33.data.sfx.js" />
+            <File name="TheOtherThing\src\ld33.data.spritedef.js" />
+            <File name="TheOtherThing\src\ld33.deprecated.js" />
+            <File name="TheOtherThing\src\ld33.ents.js" />
+            <File name="TheOtherThing\src\ld33.js" />
+            <File name="TheOtherThing\src\ld33.levels.js" />
+            <File name="TheOtherThing\src\ld33.map.js" />
+            <File name="TheOtherThing\src\ld33.namespace.js" />
+            <File name="TheOtherThing\src\ld33.player.js" />
+            <File name="TheOtherThing\src\ld33.scenes.js" />
+            <File name="TheOtherThing\src\ld33b.js" />
+        </Folder>
+        <File name="TheOtherThing\changelog.txt" />
+        <File name="TheOtherThing\devdoc.txt" />
+        <File name="TheOtherThing\ld33.css" />
+        <File name="TheOtherThing\ld33.html" />
+        <File name="TheOtherThing\ld33b.html" />
+        <File name="TheOtherThing\readme.md" />
+    </Project>
+</NotepadPlus>

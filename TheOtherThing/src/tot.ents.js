@@ -63,7 +63,7 @@ Crafty.c("NonPlayerCharacter", {
 
 Crafty.c("NewScientist", {
 	init : function() {
-		this.requires("NonPlayerCharacter, AI_Wander, SCIENTIST_SPRITE");
+		this.requires("NonPlayerCharacter, Actionable, AI_Wander, SCIENTIST_SPRITE");
         this.setBearing(TOT.CONST.BEARING.DOWN);
 	} ,
 });

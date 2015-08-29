@@ -116,7 +116,6 @@ Crafty.c("NPCAnimationController", {
 		if(this._bearing < TOT.CONST.BEARING.NONE) {
 			var reelName = this._animationControllerAction + "_" + 
 				TOT.CONST.BEARING_NAMES[this._bearing];
-				console.log("Animation_Reel : " + reelName);
 				if(this._bearing === TOT.CONST.BEARING.LEFT) {
 					this.flip("X");
 				} else {
@@ -124,7 +123,6 @@ Crafty.c("NPCAnimationController", {
 				}
 			this.animate( reelName, -1 );
 		} else {
-			console.log("Animation_Reel : " + this._animationControllerAction);
 			this.animate( this._animationControllerAction, -1 );
 		}
 	},
