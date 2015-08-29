@@ -1,8 +1,8 @@
-var LD33 = LD33 || {};
-LD33.DATA = LD33.DATA || {};
+var TOT = TOT || {};
+TOT.DATA = TOT.DATA || {};
 Crafty.paths({ audio: "sfx/" });
 
-LD33.DATA.SFX = {
+TOT.DATA.SFX = {
 	audio: {
 		"select_sound": "select_sound.wav",
 		"selection_execute_sound": "bwoop_sound.wav",

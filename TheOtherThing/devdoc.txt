@@ -22,6 +22,8 @@ The Thing (John Carpenter)
 Stealth game where you are the THING. Kind of
 like 1p version of Mafia?
 
+Puzzle solving ( find item for npc, or find object a to fix broken thing b )
+
 Style : 
 
 -== Notes =======================================================================-

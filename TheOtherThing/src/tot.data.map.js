@@ -1,8 +1,8 @@
-var LD33 = LD33 || {};
-LD33.DATA = LD33.DATA || {};
+var TOT = TOT || {};
+TOT.DATA = TOT.DATA || {};
 
-// To be used with LD33.MAP.Mapper.loadMap
-LD33.DATA.MAP = {
+// To be used with TOT.MAP.Mapper.loadMap
+TOT.DATA.MAP = {
 	W1M1 : {
 		exit_to: "W1M2", // The next scene to load when player exits this map.
 		width : 16,

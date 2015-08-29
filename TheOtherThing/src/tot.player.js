@@ -1,5 +1,5 @@
 // Player code!
-LD33.SpawnPlayer = function(x, y) {
+TOT.SpawnPlayer = function(x, y) {
 	Crafty.e("NewPlayer").attr( { x:x, y:y } );
 };
 

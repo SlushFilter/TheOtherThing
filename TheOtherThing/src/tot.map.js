@@ -19,24 +19,24 @@ Crafty.c("Block", {
 	// Define hitbox on entity creation.
 });
 
-LD33.MAP.MAPOBJECTS = [
+TOT.MAP.MAPOBJECTS = [
 	null, 
-	function(x, y) { LD33.MAP.Mapper.placeBlock(x, y); }, // 01 - Place a block
+	function(x, y) { TOT.MAP.Mapper.placeBlock(x, y); }, // 01 - Place a block
 	function(x, y) { // 02 - Place a test entity
-		LD33.MAP.Mapper.placeThing(x, y, Crafty.e("Scientist"));
+		TOT.MAP.Mapper.placeThing(x, y, Crafty.e("Scientist"));
 	},  
 	function(x, y) { // 03 - Place an ExitBlock
 		exit_block = Crafty.e("ExitBlock");
-		LD33.MAP.Mapper.placeThing(x, y, exit_block);
+		TOT.MAP.Mapper.placeThing(x, y, exit_block);
 	},
 	function(x, y) { // 04 - New and improved science!
-		LD33.MAP.Mapper.placeThing(x, y, Crafty.e("NewScientist"));
+		TOT.MAP.Mapper.placeThing(x, y, Crafty.e("NewScientist"));
 	}
 	
 ];
 
 // Utility class for setting tiles on the map.
-LD33.MAP.Mapper = {
+TOT.MAP.Mapper = {
 	current_map: null,
 	_tWidth : 32,
 	_tHeight : 32,
@@ -95,7 +95,7 @@ LD33.MAP.Mapper = {
 				}
 				attr = data.attr[y][x];
 				if(attr > 0) {
-					LD33.MAP.MAPOBJECTS[attr](x,y);
+					TOT.MAP.MAPOBJECTS[attr](x,y);
 				}
 			}
 		}

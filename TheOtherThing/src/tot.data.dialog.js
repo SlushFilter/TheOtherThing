@@ -1,5 +1,5 @@
-var LD33 = LD33 || {};
-LD33.DATA = LD33.DATA || {};
+var TOT = TOT || {};
+TOT.DATA = TOT.DATA || {};
 
 /*
 	So perhaps dialog should go like this:
@@ -45,8 +45,8 @@ function Selection(selection_text, next_dialog, result){
 			} else {
 				// Assimilate.
 				console.log("ASSIMILATE HIM!");
-				LD33.ENTS.Assimilate(menu_object.talker);
-				menu_object.talker.think = LD33.ENTS.AI_BrainDead;
+				TOT.ENTS.Assimilate(menu_object.talker);
+				menu_object.talker.think = TOT.ENTS.AI_BrainDead;
 				menu_object.assimilating = true;
 				menu_object.destroy();
 			};
@@ -54,7 +54,7 @@ function Selection(selection_text, next_dialog, result){
 	};
 };
 
-LD33.DATA.DIALOG = {
+TOT.DATA.DIALOG = {
 	
 	DIALOG_PLACEHOLDER: [
 		 new DialogNode(

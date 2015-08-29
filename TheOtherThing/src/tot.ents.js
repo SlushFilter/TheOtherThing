@@ -1,4 +1,4 @@
-LD33.ENTS.CreateHud = function() {
+TOT.ENTS.CreateHud = function() {
 	var hud = Crafty.e("HUD");
 	var hudText = Crafty.e("2D, Canvas, Text").attr({ x: 8, y: 8, z:512 }).text("SUSPICION").textColor('white');
 	hud.attach(hudText);
@@ -23,7 +23,7 @@ Crafty.c("AI_Wander", {
 	} ,
 	_AI_Wander : function() {
 		var bearing = Crafty.math.randomInt(0, 7);
-		if(bearing >= LD33.CONST.BEARING.NONE)  { // Causes the mob to idle.
+		if(bearing >= TOT.CONST.BEARING.NONE)  { // Causes the mob to idle.
 			this.trigger("MobStop");
 		} else { // Otherwise make the mob move in a direction.
 			this.trigger("MobIdle");
@@ -32,7 +32,7 @@ Crafty.c("AI_Wander", {
 	}
 });
 
-LD33.ENTS.Assimilate = function(target) {
+TOT.ENTS.Assimilate = function(target) {
 	var player = Crafty("Feeler");
 	console.log(player);
 	console.log(player.posession);
@@ -51,7 +51,7 @@ LD33.ENTS.Assimilate = function(target) {
 	});
 };
 
-LD33.SpawnCorpse = function(spriteSheet, x, y) {
+TOT.SpawnCorpse = function(spriteSheet, x, y) {
 	Crafty.e("2D, Canvas, " + spriteSheet).attr( { x:x, y:y, z:-10 } ).animate("DIE");
 };
 
@@ -64,7 +64,7 @@ Crafty.c("NonPlayerCharacter", {
 Crafty.c("NewScientist", {
 	init : function() {
 		this.requires("NonPlayerCharacter, AI_Wander, SCIENTIST_SPRITE");
-        this.setBearing(LD33.CONST.BEARING.DOWN);
+        this.setBearing(TOT.CONST.BEARING.DOWN);
 	} ,
 });
 
@@ -130,20 +130,20 @@ Crafty.c("Scientist",
 		}
 	},
 	
-	think : LD33.ENTS.AI_Wander,
+	think : TOT.ENTS.AI_Wander,
 	
 	actScience: function() {
 		console.log("I am a scientist. Please do not be a monster!");
-		if(this.think !== LD33.ENTS.AI_BrainDead){ // Temporary hack to stop player talking to itself.
-			Crafty.e("Menu").setTalker(this).loadDialog(LD33.DATA.DIALOG.DIALOG_STANDARD);
+		if(this.think !== TOT.ENTS.AI_BrainDead){ // Temporary hack to stop player talking to itself.
+			Crafty.e("Menu").setTalker(this).loadDialog(TOT.DATA.DIALOG.DIALOG_STANDARD);
 		};
-		// LD33.ENTS.Assimilate(this);
-		// this.think = LD33.ENTS.AI_BrainDead;
+		// TOT.ENTS.Assimilate(this);
+		// this.think = TOT.ENTS.AI_BrainDead;
 	},
 	die : function() {
 		console.log("OH YOU HAVE KILLED ME!");
 		this.animate("IDLE", -1);
-		LD33.SpawnCorpse("TEMP_HUMAN_SPRITE", this.x, this.y);
+		TOT.SpawnCorpse("TEMP_HUMAN_SPRITE", this.x, this.y);
 		this.destroy();
 		
 	}

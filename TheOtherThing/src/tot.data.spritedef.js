@@ -1,8 +1,8 @@
-var LD33 = LD33 || {};
-LD33.DATA = LD33.DATA || {};
+var TOT = TOT || {};
+TOT.DATA = TOT.DATA || {};
 Crafty.paths( { images: "gfx/" } );
 
-LD33.DATA.SPRITEDEF = {
+TOT.DATA.SPRITEDEF = {
 	sprites : {
 		"placeholder_jones.png" : {
 			tile : 30,
@@ -101,7 +101,7 @@ Crafty.c("NPCAnimationController", {
 	init : function() {
 		this.requires("NonPlayerCharacter, SpriteAnimation");
 		this._animationControllerAction = "IDLE";
-		this._animationControllerBearing = LD33.CONST.BEARING.DOWN;
+		this._animationControllerBearing = TOT.CONST.BEARING.DOWN;
 		this.bind("Turn", this._animationControllerTurn);
 		this.bind("MobMove", this._animationControllerMobMove);
 		this.bind("MobStop", this._animationControllerMobStop);
@@ -113,11 +113,11 @@ Crafty.c("NPCAnimationController", {
 	} ,
 	_animationControllerUpdate : function() {
 		if(this._animationControllerEnabled === false) { return; }
-		if(this._bearing < LD33.CONST.BEARING.NONE) {
+		if(this._bearing < TOT.CONST.BEARING.NONE) {
 			var reelName = this._animationControllerAction + "_" + 
-				LD33.CONST.BEARING_NAMES[this._bearing];
+				TOT.CONST.BEARING_NAMES[this._bearing];
 				console.log("Animation_Reel : " + reelName);
-				if(this._bearing === LD33.CONST.BEARING.LEFT) {
+				if(this._bearing === TOT.CONST.BEARING.LEFT) {
 					this.flip("X");
 				} else {
 					this.unflip("X");
@@ -146,7 +146,7 @@ Crafty.c("NPCAnimationController", {
     },
 	_animationControllerDie : function(dieInfo) {
 		this._animationControllerAction = "DIE";
-		this._animationConrollerBearing = LD33.CONST.BEARING.NONE;
+		this._animationConrollerBearing = TOT.CONST.BEARING.NONE;
 		this._animationControllerUpdate();
 	}
 });

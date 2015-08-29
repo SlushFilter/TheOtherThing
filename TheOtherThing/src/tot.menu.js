@@ -79,8 +79,8 @@ Crafty.c("Selectionable", {
 				// } else if (this.selection_objects_array[this.selection_current].RESULT === -2) {
 					// He fell for it! ASSIMILATE!
 					// console.log("ASSIMILATE HIM!");
-					// LD33.ENTS.Assimilate(this.talker);
-					// this.talker.think = LD33.ENTS.AI_BrainDead;
+					// TOT.ENTS.Assimilate(this.talker);
+					// this.talker.think = TOT.ENTS.AI_BrainDead;
 					// this.assimilating = true;
 					// this.destroy();
 				// };

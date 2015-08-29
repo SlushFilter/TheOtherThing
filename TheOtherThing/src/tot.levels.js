@@ -1,7 +1,7 @@
 // Level map placeholder.
-var LD33 = LD33 || {};
+var TOT = TOT || {};
 
-LD33.Mapper = {
+TOT.Mapper = {
 	_tWidth : 32,
 	_tHeight : 32,
 	_mWidth : 32,
@@ -32,7 +32,7 @@ w1m1 = {
 		Crafty.sprite(32, "gfx/placeholder_sprite.png", {bob:[0,0]});
 		
 		//var map = Crafty.isometric.size(32,32);
-		var map = LD33.Mapper.tSize(32, 32);
+		var map = TOT.Mapper.tSize(32, 32);
 		
 		for(var x = 1; x <= 20; x++)
 		{

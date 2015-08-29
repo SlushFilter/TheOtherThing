@@ -5,24 +5,24 @@ Crafty.defineScene("MainMenu", function() {
 	Crafty.e("TopMenu");
 });
 
-// TODO: Create a factory that will load the info for each scene from LD33.DATA.MAP
+// TODO: Create a factory that will load the info for each scene from TOT.DATA.MAP
 Crafty.defineScene("W1M1", function() {
 	// Scene contents
-	LD33.MAP.Mapper.loadMap(LD33.DATA.MAP.W1M1);
+	TOT.MAP.Mapper.loadMap(TOT.DATA.MAP.W1M1);
 	jonesy = Crafty.e("NewPlayer").location(200,256,32000);
 	Crafty.viewport.follow(jonesy, 0, 0);
-	LD33.ENTS.CreateHud();
+	TOT.ENTS.CreateHud();
 });
 
 Crafty.defineScene("W1M2", function() {
 	// Scene contents
-	LD33.MAP.Mapper.loadMap(LD33.DATA.MAP.W1M2);
+	TOT.MAP.Mapper.loadMap(TOT.DATA.MAP.W1M2);
 	// TODO: Need to remember Jonesy's state between maps. This can be done by giving him the "Persist" Component. We'd need to modify how assimilation works so that player is always controlling the same entity instead of killing off poor Jonesy.
     // TODO: Im working on that today :) 
     
 	jonesy = Crafty.e("Player").location(200,256,32000);
 	Crafty.viewport.follow(jonesy, 0, 0);
-	LD33.ENTS.CreateHud();
+	TOT.ENTS.CreateHud();
 });
 
 Crafty.defineScene("EndGame", function() {

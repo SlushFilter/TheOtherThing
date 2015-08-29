@@ -109,7 +109,7 @@ Crafty.c("ExitBlock", {
 	},
 	nextScene: function() {
 		// Call this to move to the next scene as indicated by the map.
-		Crafty.enterScene(LD33.MAP.Mapper.current_map.exit_to);
+		Crafty.enterScene(TOT.MAP.Mapper.current_map.exit_to);
 	},
 	finishGame: function() {
 		// Call this to load the end game screen.
@@ -124,12 +124,12 @@ Crafty.c("ExitBlock", {
 // Pressing a key will one-shot fire an event.
 // All controller events will pass a
 // true or false value indicating if the key was pressed (true) or released (false)
-// and a direction ( described in LD33.CONST.BEARING[] )
+// and a direction ( described in TOT.CONST.BEARING[] )
 // example event receiver function :
 
 // actionListen : function(data) {
 //		var on = data.state; // was the key just pressed ?
-//		var direciton = data.dir; // one of LD33.CONST.BEARING
+//		var direciton = data.dir; // one of TOT.CONST.BEARING
 // }
 
 // ------------------------------
@@ -158,10 +158,10 @@ Crafty.c("KeyboardControl", {
 		
 		// Default keystate, setup for throwing Mob controls.
         this.keyState = [
-            { key:Crafty.keys.UP_ARROW,    event:"MobMove", state:false, args: LD33.CONST.BEARING.UP },	
-            { key:Crafty.keys.DOWN_ARROW,  event:"MobMove", state:false, args: LD33.CONST.BEARING.DOWN },  
-            { key:Crafty.keys.LEFT_ARROW,  event:"MobMove", state:false, args: LD33.CONST.BEARING.LEFT },  
-            { key:Crafty.keys.RIGHT_ARROW, event:"MobMove", state:false, args: LD33.CONST.BEARING.RIGHT }, 
+            { key:Crafty.keys.UP_ARROW,    event:"MobMove", state:false, args: TOT.CONST.BEARING.UP },	
+            { key:Crafty.keys.DOWN_ARROW,  event:"MobMove", state:false, args: TOT.CONST.BEARING.DOWN },  
+            { key:Crafty.keys.LEFT_ARROW,  event:"MobMove", state:false, args: TOT.CONST.BEARING.LEFT },  
+            { key:Crafty.keys.RIGHT_ARROW, event:"MobMove", state:false, args: TOT.CONST.BEARING.RIGHT }, 
             { key:Crafty.keys.ENTER,       event:"Act",     state:false, args: null},
             { key:Crafty.keys.Z,           event:"Attack",  state:false, args: null},
             { key:Crafty.keys.SPACE,       event:"Jump",    state:false, args: null}
@@ -238,10 +238,10 @@ Crafty.c("Mobile", {
 	init : function() {
         this.requires("Velocity, Bearing");
         this._mobileImpulse = [ // Move register
-            { s:0, n:-1 }, // Index = LD33.CONST.BEARING.UP
-            { s:0, n: 1 }, // LD33.CONST.BEARING.DOWN
-            { s:0, n:-1 }, // LD33.CONST.BEARING.LEFT
-            { s:0, n: 1 }  // LD33.CONST.BEARING.RIGHT
+            { s:0, n:-1 }, // Index = TOT.CONST.BEARING.UP
+            { s:0, n: 1 }, // TOT.CONST.BEARING.DOWN
+            { s:0, n:-1 }, // TOT.CONST.BEARING.LEFT
+            { s:0, n: 1 }  // TOT.CONST.BEARING.RIGHT
         ];
 		this.bind("MobMove", this._mobileHandleMobMove);
         this.bind("MobStop", this._mobileHandleMobStop);
@@ -260,18 +260,18 @@ Crafty.c("Mobile", {
             this._mobileImpulse[dir].s = 0;
         }
         // Figure out velocity vector.
-		this.vel.x = this._mobileImpulse[LD33.CONST.BEARING.LEFT].s +
-                     this._mobileImpulse[LD33.CONST.BEARING.RIGHT].s;
-        this.vel.y = this._mobileImpulse[LD33.CONST.BEARING.UP].s +
-                     this._mobileImpulse[LD33.CONST.BEARING.DOWN].s;
+		this.vel.x = this._mobileImpulse[TOT.CONST.BEARING.LEFT].s +
+                     this._mobileImpulse[TOT.CONST.BEARING.RIGHT].s;
+        this.vel.y = this._mobileImpulse[TOT.CONST.BEARING.UP].s +
+                     this._mobileImpulse[TOT.CONST.BEARING.DOWN].s;
 		// Figure out what direction we're facing (favor up and down)
-		if(this.vel.y < 0) { dir = LD33.CONST.BEARING.UP;
+		if(this.vel.y < 0) { dir = TOT.CONST.BEARING.UP;
 		} else if (this.vel.y > 0) { 
-			dir = LD33.CONST.BEARING.DOWN;
+			dir = TOT.CONST.BEARING.DOWN;
 		} else if (this.vel.x < 0) { 
-			dir = LD33.CONST.BEARING.LEFT;
+			dir = TOT.CONST.BEARING.LEFT;
 		} else if (this.vel.x > 0) { 
-			dir = LD33.CONST.BEARING.RIGHT;
+			dir = TOT.CONST.BEARING.RIGHT;
 		}
 		this.setBearing(dir);
     },
@@ -288,10 +288,10 @@ Crafty.c("Mobile", {
 // Bearing
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Component that describes what direction an entity is facing.
-// .bearing = one of LD33.CONST.BEARING
+// .bearing = one of TOT.CONST.BEARING
 Crafty.c("Bearing", {
     init : function() {
-        this._bearing = LD33.CONST.BEARING.DOWN;
+        this._bearing = TOT.CONST.BEARING.DOWN;
     },
     setBearing : function(bearing) {
         if(this._bearing !== bearing) { // Did we change orientation?

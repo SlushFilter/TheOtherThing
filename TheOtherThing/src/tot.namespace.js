@@ -1,4 +1,4 @@
-var LD33 = {
+var TOT = {
 	DATA : {
 		MAP : {},
 		SPRITEDEF : {},
