@@ -139,8 +139,18 @@ Crafty.c("Selectionable", {
 	
 });
 
+// Layout prototype.
+function MenuLayout(){
+	this.menuHeight;
+	this.menuWidth;
+	this.menuX;
+	this.menuY;
+	this.ofsX;
+	this.ofsY;
+};
+
 Crafty.c("Menu", {
-	// TODO: Make these bastard scientists stop moving when we're talking to them!
+	// TODO: Make these bastard scientists stop moving while we're talking to them!
 	text_width: 300,
 	cursor : null,
 	dialog_tree: [],
@@ -148,10 +158,41 @@ Crafty.c("Menu", {
 	talker: null, // Reference to the entity who is talking.
 	assimilating: false, // So we can properly re-enable movement controls when not assimilating.
 	
+	viewport_w: null,
+	viewport_h: null,
+	viewport_x: null,
+	viewport_y: null,
+	menuHeight: null,
+	menuWidth: null,
+	_ofsX: null,
+	_ofsY: null,
+	menuX: null,
+	menuY: null,
+	
 	init: function(){
 		this.requires("Thing");//, Selectionable");
 		Crafty.audio.play("selection_execute_sound");
+		
+		// Generate default layouts.
+		this.viewport_w = Crafty.viewport.rect_object._w;
+		this.viewport_h = Crafty.viewport.rect_object._h;
+		this.viewport_x = Crafty.viewport.rect_object._x;
+		this.viewport_y = Crafty.viewport.rect_object._y;
+		// Layout 0: Dialog window centered and takes up 75% of the screen. Main text centered in top 1/3 of window. Selection text centered in bottom 2/3.
+		this.tempLayout = new MenuLayout();
+		this.tempLayout.menuHeight = 0.5 * this.viewport_h;
+		this.tempLayout.menuWidth = 0.75 * this.viewport_w;
+		this.tempLayout.ofsX = (this.viewport_w - this.tempLayout.menuWidth) / 2;
+		this.tempLayout.ofsY = (this.viewport_h - this.tempLayout.menuHeight) / 2;
+		this.tempLayout.menuX = this.viewport_x + this.tempLayout.ofsX;
+		this.tempLayout.menuY = this.viewport_y + this.tempLayout.ofsY;
+		this.menu = Crafty.e("MenuBackground").setAttr(this.tempLayout).color("blue");
+		this.attach(this.menu);
+		// Layout 1: Dialog window centered in bottom 1/3 of screen. Images dynamically positioned in top 2/3 of screen. Text as in Layout 1.
+		// Layout 2: Dialog window positioned in right or left 1/2 of screen. Images dynamically positioned in opposite 1/2. Text as in other layouts.
+		
 	} , 
+	
 	loadDialog: function(dialogArray) {
 		this.dialog_tree = dialogArray;
 		// Crafty.trigger("ToggleControl"); // Kill movement controls while in menu.
@@ -167,9 +208,6 @@ Crafty.c("Menu", {
 		
 		// Display menu background.
 		// this.menu = Crafty.e("MenuBackground").color("blue");
-		this.menu = Crafty.e("MenuLayout");
-		this.menu.setLayout(0);
-		this.attach(this.menu);
 		// this.cursor = Crafty.e("MenuSelector");
 		// this.attach(this.cursor);
 		
@@ -208,41 +246,6 @@ Crafty.c("Menu", {
 	*/
 });
 
-// Preset layout options for dialog window, text and images.
-Crafty.c("MenuLayout", {
-	
-	default_layouts: [],
-	init: function(layout_index) {
-		this.requires("2D, DOM, Color");
-		this.viewport_w = Crafty.viewport.rect_object._w;
-		this.viewport_h = Crafty.viewport.rect_object._h;
-		this.viewport_x = Crafty.viewport.rect_object._x;
-		this.viewport_y = Crafty.viewport.rect_object._y;
-		this.default_layouts = [
-			{ 
-				// Layout 0: Dialog window centered and takes up 75% of the screen. Main text centered in top 1/3 of window. Selection text centered in bottom 2/3.
-				menuHeight: 0.5 * this.viewport_h,
-				menuWidth: 0.75 * this.viewport_w,
-				_ofsX: (this.viewport_w - this.menuWidth) / 2,
-				_ofsY: (this.viewport_h - this.menuHeight) / 2,
-				menuX: this.viewport_x + this._ofsX,
-				menuY: this.viewport_y + this.ofsY,
-			},
-			{
-				// Layout 1: Dialog window centered in bottom 1/3 of screen. Images dynamically positioned in top 2/3 of screen. Text as in Layout 1.
-			},
-			{
-				// Layout 2: Dialog window positioned in right or left 1/2 of screen. Images dynamically positioned in opposite 1/2. Text as in other layouts.
-			},
-		];
-	},
-	
-	setLayout: function(layout_index) {
-		console.log("Creating menu.");
-		this.background = Crafty.e("MenuBackground").setAttr(this.default_layouts[layout_index]).color("blue");
-	}
-});
-
 // So this will eventually load sprites (or just one if it's fixed size) for menu background and borders
 Crafty.c("MenuBackground", {
 	_ofsX : 0,
@@ -272,12 +275,14 @@ Crafty.c("MenuBackground", {
 		// this.y = (-Crafty.viewport.y) + this._ofsY;
 	},
 	
-	setAttr: function(layout_array) {
+	setAttr: function(layout_object) {
 		console.log("Setting attributes.");
-		this.w = layout_array.menuWidth;
-		this.h = layout_array.menuHeight;
-		this.x = layout_array.menuX;
-		this.y = layout_array.menuY;
+		this.w = layout_object.menuWidth;
+		this.h = layout_object.menuHeight;
+		this.x = layout_object.menuX;
+		this.y = layout_object.menuY;
+		console.log("menuX: " + layout_object.menuX + " menuY: " + layout_object.menuY);
+		console.log("menuH: " + layout_object.menuHeight + " menuW: " + layout_object.menuWidth);
 		return this;
 	}
 });
