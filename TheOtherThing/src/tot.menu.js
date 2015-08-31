@@ -149,34 +149,40 @@ Crafty.c("Menu", {
 	assimilating: false, // So we can properly re-enable movement controls when not assimilating.
 	
 	init: function(){
-		this.requires("Thing, Selectionable");
+		this.requires("Thing");//, Selectionable");
 		Crafty.audio.play("selection_execute_sound");
 	} , 
 	loadDialog: function(dialogArray) {
 		this.dialog_tree = dialogArray;
-		Crafty.trigger("ToggleControl"); // Kill movement controls while in menu.
-		this.bind("Remove", function() { // Resurrect movement controls when we exit the menu.
-			if(!this.assimilating){
-				Crafty.trigger("ToggleControl");
-			};
-			console.log(this.talker);
-		});
+		// Crafty.trigger("ToggleControl"); // Kill movement controls while in menu.
+		// this.bind("Remove", function() { // Resurrect movement controls when we exit the menu.
+			// if(!this.assimilating){
+				// Crafty.trigger("ToggleControl");
+			// };
+			// console.log(this.talker);
+		// });
+		
+		// Select layout, then set menu window dimensions and position, then load text and position.
+		
+		
 		// Display menu background.
-		this.menu = Crafty.e("MenuBackground").color("blue");
+		// this.menu = Crafty.e("MenuBackground").color("blue");
+		this.menu = Crafty.e("MenuLayout");
+		this.menu.setLayout(0);
 		this.attach(this.menu);
-		this.cursor = Crafty.e("MenuSelector");
-		this.attach(this.cursor);
+		// this.cursor = Crafty.e("MenuSelector");
+		// this.attach(this.cursor);
 		
-		this.primaryTextY = this.menu.y + (this.menu.h * 0.25); // For testing, will move.
+		// this.primaryTextY = this.menu.y + (this.menu.h * 0.25); // For testing, will move.
 		
-		this.nextDialog(0);
+		// this.nextDialog(0);
 	},
 	
 	setTalker: function(who_dat) {
 		this.talker = who_dat;
 		return this;
 	},
-	
+	/*
 	// Function to load NEXT_DIALOG node.
 	nextDialog: function(next_index){
 		this.clearSelectionText();
@@ -191,7 +197,7 @@ Crafty.c("Menu", {
 			.text(this.dialog_tree[next_index].challenge_text)
 			.textColor('white'); 
 		
-		// Should this be a child of the bacground entity? Would that destroy all text when we destroy the background entity?
+		// Should this be a child of the background entity? Would that destroy all text when we destroy the background entity?
 		// Calling this.menu.destroy() would recursiveley destroy all of its children... so yes ? :)
 		// THANK YOU FOR YOUR INPUT!
 		this.attach(this.primary_text);
@@ -199,37 +205,83 @@ Crafty.c("Menu", {
 		// Display selectable options.
 		this.loadSelectionText(this.dialog_tree[next_index].selections);
 	},
+	*/
+});
+
+// Preset layout options for dialog window, text and images.
+Crafty.c("MenuLayout", {
 	
+	default_layouts: [],
+	init: function(layout_index) {
+		this.requires("2D, DOM, Color");
+		this.viewport_w = Crafty.viewport.rect_object._w;
+		this.viewport_h = Crafty.viewport.rect_object._h;
+		this.viewport_x = Crafty.viewport.rect_object._x;
+		this.viewport_y = Crafty.viewport.rect_object._y;
+		this.default_layouts = [
+			{ 
+				// Layout 0: Dialog window centered and takes up 75% of the screen. Main text centered in top 1/3 of window. Selection text centered in bottom 2/3.
+				menuHeight: 0.5 * this.viewport_h,
+				menuWidth: 0.75 * this.viewport_w,
+				_ofsX: (this.viewport_w - this.menuWidth) / 2,
+				_ofsY: (this.viewport_h - this.menuHeight) / 2,
+				menuX: this.viewport_x + this._ofsX,
+				menuY: this.viewport_y + this.ofsY,
+			},
+			{
+				// Layout 1: Dialog window centered in bottom 1/3 of screen. Images dynamically positioned in top 2/3 of screen. Text as in Layout 1.
+			},
+			{
+				// Layout 2: Dialog window positioned in right or left 1/2 of screen. Images dynamically positioned in opposite 1/2. Text as in other layouts.
+			},
+		];
+	},
+	
+	setLayout: function(layout_index) {
+		console.log("Creating menu.");
+		this.background = Crafty.e("MenuBackground").setAttr(this.default_layouts[layout_index]).color("blue");
+	}
 });
 
 // So this will eventually load sprites (or just one if it's fixed size) for menu background and borders
 Crafty.c("MenuBackground", {
 	_ofsX : 0,
 	_ofsY : 0,
+	// Need to store sprites for borders and background.
+	border_sprites: [],
+	background_sprite: null,
+	
 	init: function() {
 		this.requires("2D, DOM, Color");
 		// One size fits all.
-		var menuWidth = 0.75; // Horizontal percentage of the screen to fill.
-		var menuHeight = 0.5; // Vertical percentage of the screen to fill.
+		// var menuWidth = 0.75; // Horizontal percentage of the screen to fill.
+		// var menuHeight = 0.5; // Vertical percentage of the screen to fill.
 		
 		// Figure out the dimensions of the menu rectangle.
-		var vw = Crafty.viewport._width;
-		var vh = Crafty.viewport._height;
-		this.w = vw * menuWidth;
-		this.h = vh * menuHeight;
+		// var vw = Crafty.viewport._width;
+		// var vh = Crafty.viewport._height;
+		// this.w = vw * menuWidth;
+		// this.h = vh * menuHeight;
 		
 		// Calculate offsets for center (for now)
-		this._ofsX = (vw - this.w) / 2; 
-		this._ofsY = (vh - this.h) / 2;
+		// this._ofsX = (vw - this.w) / 2; 
+		// this._ofsY = (vh - this.h) / 2;
 		
  		// Negative offsets, because we want to undo any viewport panning.
-		this.x = (-Crafty.viewport.x) + this._ofsX;
-		this.y = (-Crafty.viewport.y) + this._ofsY;
+		// this.x = (-Crafty.viewport.x) + this._ofsX;
+		// this.y = (-Crafty.viewport.y) + this._ofsY;
+	},
+	
+	setAttr: function(layout_array) {
+		console.log("Setting attributes.");
+		this.w = layout_array.menuWidth;
+		this.h = layout_array.menuHeight;
+		this.x = layout_array.menuX;
+		this.y = layout_array.menuY;
+		return this;
 	}
 });
 
-// Fixed: Leave my DOM alone! ;)
-// Seriously, though, I think DOM is better for the menus.
 Crafty.c("MenuSelector", {
 	init : function() {
 		this.requires("2D, DOM, Color");
