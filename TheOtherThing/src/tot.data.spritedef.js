@@ -89,6 +89,7 @@ Crafty.c("SCIENTIST_SPRITE", {
 	}
 });
 
+// TODO: Refactor, there is certainly a better way to do this.
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // NPC Animation Controller
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -96,6 +97,7 @@ Crafty.c("SCIENTIST_SPRITE", {
 // This should be inherited from something that works with SpriteAnimation
 
 // This works ... trust me.
+
 Crafty.c("NPCAnimationController", {
 	_animationControllerEnabled : true,
 	init : function() {
@@ -113,10 +115,10 @@ Crafty.c("NPCAnimationController", {
 	} ,
 	_animationControllerUpdate : function() {
 		if(this._animationControllerEnabled === false) { return; }
-		if(this._bearing < TOT.CONST.BEARING.NONE) {
+		if(this.bearing < TOT.CONST.BEARING.NONE) {
 			var reelName = this._animationControllerAction + "_" + 
-				TOT.CONST.BEARING_NAMES[this._bearing];
-				if(this._bearing === TOT.CONST.BEARING.LEFT) {
+				TOT.CONST.BEARING_NAMES[this.bearing];
+				if(this.bearing === TOT.CONST.BEARING.LEFT) {
 					this.flip("X");
 				} else {
 					this.unflip("X");
@@ -127,7 +129,7 @@ Crafty.c("NPCAnimationController", {
 		}
 	},
 	_animationControllerTurn : function(bearing) {
-        this._bearing = bearing;
+        this.bearing = bearing;
 		this._animationControllerUpdate();
 	},
 	_animationControllerMobMove : function(moveInfo) {

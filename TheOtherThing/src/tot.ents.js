@@ -57,7 +57,7 @@ TOT.SpawnCorpse = function(spriteSheet, x, y) {
 
 Crafty.c("NonPlayerCharacter", {
 	init : function() {
-		this.requires("Thing, Mobile, Solid, Bearing, CollidesWithSolid, WiredHitBox");
+		this.requires("Thing, Mobile, Bearing, CollidesWithSolid, WiredHitBox");
 	}
 });
 

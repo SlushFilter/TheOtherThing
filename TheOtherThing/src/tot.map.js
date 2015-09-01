@@ -1,24 +1,4 @@
 // Level map placeholder.
-
-Crafty.c("Tile", {
-	init: function() {
-		this.addComponent("Thing"); 
-	},
-	setTile : function(tileIndex) {
-		var x = tileIndex % 20; // 640 / 32
-		var y = (tileIndex / 20) | 0; // 640 / 32
-		this.sprite(x, y, 0);
-		return this;
-	}
-});
-
-Crafty.c("Block", {
-	init: function() {
-		this.addComponent("Solid, Collision");
-	}
-	// Define hitbox on entity creation.
-});
-
 TOT.MAP.MAPOBJECTS = [
 	null, 
 	function(x, y) { TOT.MAP.Mapper.placeBlock(x, y); }, // 01 - Place a block

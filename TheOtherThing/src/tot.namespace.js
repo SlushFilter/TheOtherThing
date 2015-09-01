@@ -20,6 +20,8 @@ var TOT = {
 			"LEFT",
 			"RIGHT",
 			"NONE" // No Direction
-		]
+		],
+		BACKGROUND_Z : 0,
+		OVERLAY_Z : 65535
     }
 }

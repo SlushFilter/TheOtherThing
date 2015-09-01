@@ -2,122 +2,174 @@
 // Components
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Put basic components here. Specific entities will go elsewhere.
-// For first implementation, player is a separate component. Should all "living" entities be derived from the same basic "mob" component?
+// For first implementation, player is a separate component. Should all "living" entities be derived
+// from the same basic "mob" component?
 
-Crafty.c("HUD", {
+// #################################################################################################
+// GRAPHICS MODIFICATION COMPONENTS
+// #################################################################################################
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// GfxBackground
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Sets z to always render the tile on the background layer.
+Crafty.c("GfxBackground", {
 	init: function() {
-		this.addComponent("2D, Canvas, Color");
-		this.color(64, 64, 64);
-		this.x = 0;
-		this.y = 0;
-		this.w = 128;
-		this.h = 64;
-		this.z = 512;
-		this.bind("ViewportScroll", this.update);
+		this.z = TOT.CONST.BACKGROUND_Z;
+	}
+});
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// GfxOverlay7
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Sets z to always render the tile on the overlay layer.
+Crafty.c("GfxOverlay", {
+	init: function() {
+		this.z = TOT.CONST.OVERLAY_Z;
+	}
+});
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// GfxPlayfield
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Dynamically modifies z to (hopefully) make ents with lesser Y coordinates be rendered first.
+// This will always override GfxBackground and GfxOverlay modifiers.
+Crafty.c("GfxPlayfield", {
+	init: function() {
+		this.bind("PreRender", this._gfxPlayfieldPreRender);
 	} ,
-	update : function() {
-		this.x = -(Crafty.viewport.x) + 32;
-		this.y = -(Crafty.viewport.y) + 32;
-		
+	_gfxPlayfieldPreRender : function() {
+		this.z = this.y | 0;
 	}
 });
 
-Crafty.c("Thing", {
-	init: function () {
-		this.addComponent("2D, Canvas, Color");
-	},
-	location: function(x, y, z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		return this;
-	}
-});
+// #################################################################################################
+// SPACIAL / PHYSICS COMPONENTS
+// #################################################################################################
 
-Crafty.c("Actionable", {
-	// For things which are actionable.
-	actualize: function() {
-		console.log("HIT!");
-	} ,
-	takeDamage : function() {
-		console.log("DAMAGE!");
-	} 
-});
-
-// Need a feeler in order to feel things.
-Crafty.c("Feeler", {
-	feelerHitBox : null,
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// HitBox
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Defines a scannable hitbox - Generally this should be used to define an entity's size in the 
+// game.
+Crafty.c("HitBox", {
 	init: function() {
-		this.requires("Thing");
-		this.feelerHitBox = Crafty.e("Thing, Collision").location(0,0,0);
-		this.feelerHitBox.action = "NONE";
-		
-		this.feelerHitBox.bind("HitOn", function(hit) {
-				for(var i = 0; i < hit.length; i++) {
-					if(this.action === "ACTUALIZE") {
-						hit[i].obj.actualize();
-					} else if (this.action === "ATTACK") {
-						hit[i].obj.takeDamage();
-					}
-				}
-				this.ignoreHits();
-			}
-		);
-		this.attach(this.feelerHitBox);
-		this.feelerHitBox.w = 4;
-		this.feelerHitBox.h = 4;
-	},
-	// Generate hit box out from face.
-	probe: function() {
-		console.log("PROBING " + this.facing);
-		var probeLength = 24;
-		var dx = this.x + (this.w / 2) | 0;
-		var dy = this.y + (this.h / 2) | 0;
-		if(this.facing === "LEFT") {
-			dx = dx - probeLength;
-		} else if (this.facing === "RIGHT") {
-			dx = dx + probeLength;
-		} else if (this.facing === "UP") {
-			dy = dy - probeLength;
-		} else if (this.facing === "DOWN") {
-			dy = dy + probeLength;
-		}
-		this.feelerHitBox.x = dx;
-		this.feelerHitBox.y = dy;
-		console.log(this.feelerHitBox.w);
-		console.log("X: " + this.x + " Y:" + this.y + " FeelerX :" + this.feelerHitBox.x + " FeelerY :" + this.feelerHitBox.y);
-		this.feelerHitBox.checkHits("Actionable");
-	},
-	stopProbing : function() {
-		console.log("STOP THE PROBE");
-		this.feelerHitBox.ignoreHits();
-	}
-});
-
-Crafty.c("Solid", {
-	init: function() {
-		this.requires("Collision");
-		this.collision();
-	}
-});
-
-Crafty.c("ExitBlock", {
-	init: function() {
-		this.requires("Collision, Thing, placeholder_sprite");
+		this.requires("2D");
 		this.w = 32;
 		this.h = 32;
-	},
-	nextScene: function() {
-		// Call this to move to the next scene as indicated by the map.
-		Crafty.enterScene(TOT.MAP.Mapper.current_map.exit_to);
-	},
-	finishGame: function() {
-		// Call this to load the end game screen.
+	} ,
+	setSize: function(width, height) {
+		this.w = width;
+		this.h = height;
 	}
 });
 
-// COMPONENT REWORK BELOW ##########################################################################
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Solid
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// More of a property than anything, this component defines an entity as being 'Solid'.
+// Entities with CollidesWithSolid will treat these as ... well a solid.
+Crafty.c("Solid", {
+	init: function() {
+		this.requires("HitBox, Collision");
+	}
+});
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Velocity
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Creates a vel property which is simply a Crafty.math.Vector2D
+// Causes an entity to move every frame depending on what its velocity is set at.
+Crafty.c("Velocity", {
+	vel: null, // Crafty.math.Vector2D
+    init : function() {
+        this.requires("2D");
+        this.bind("EnterFrame", this._velocityFrameCallback);
+        // Create the velocity object.
+        this.vel = new Crafty.math.Vector2D();
+    },
+    // EnterFrame Callback function
+    _velocityFrameCallback : function(data) {
+        this.x += (data.dt * this.vel.x);
+        this.y += (data.dt * this.vel.y);
+    }
+});
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Bearing
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Component that describes what direction an entity is facing.
+// bearing = one of TOT.CONST.BEARING
+Crafty.c("Bearing", {
+	bearing : 0,
+    init : function() { 
+		this.bearing = TOT.CONST.BEARING.DOWN;
+	},
+    setBearing : function(newBearing) {
+        if(this.bearing !== newBearing) { // Did we change orientation?
+            this.trigger("Turn", newBearing); // Trigger the turn event
+        }
+        this.bearing = newBearing;
+    }
+});
+
+// TODO: Refactor me :)
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// CollidesWithSolid
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Component to make an entity act 'solid' when checking hits against other Solid entities
+Crafty.c("CollidesWithSolid", {
+    init : function() {
+        this.requires("HitBox, Collision");
+        this.onHit("Solid", this._handleCollidesWithSolid);
+    } , 
+    _handleCollidesWithSolid : function(hit) {
+		var normal = null;
+		var mbr = null;
+		var sMbr = this.mbr();
+		for(var i=0; i < hit.length; i++) {
+			normal = hit[i].normal;
+			mbr = hit[i].obj.mbr();
+		console.log("-- Other Mbr --");
+  		    console.log(mbr);
+			if(normal.y === 1) { // Vertical collision
+				this.y = (mbr._y + mbr._h) + (this.y - sMbr._y);
+			} else if(normal.y === -1) {
+				this.y = mbr._y - sMbr._h;
+			}
+			if(normal.x === 1) { // Vertical collision
+				this.x = mbr._x + mbr._w;
+			} else if(normal.x === -1) {
+				this.x = mbr._x - sMbr._w;
+			}
+			
+			//if(hit[i].normal.y === 1) {
+			//	// Bottom
+			//	this.y = hit[i].obj.y + hit[i].obj.h;
+			//}
+			//if(hit[i].normal.y === -1) {
+			//	// Top
+			//	this.y = hit[i].obj.y - this.h;
+			//}
+			//if(hit[i].normal.x === 1) {
+			//	// Right-side of entity
+			//	this.x = hit[i].obj.x + hit[i].obj.w;
+			//}
+			//if (hit[i].normal.x === -1) {
+		//		// Left-side
+		//		this.x = hit[i].obj.x - this.w;
+		//	}
+		}
+		this.trigger("CollisionSolid");
+	}
+});
+
+// #################################################################################################
+// CONTROLLERS
+// #################################################################################################
+
+
+// TODO: Refactor this more
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Keyboard Control Components
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -209,29 +261,9 @@ Crafty.c("KeyboardControl", {
 });
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Velocity
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Creates a vel property which is simply an X, Y vector.
-// .vel { x:number, y:number }
-// Hooks the entity up to "EnterFrame" and updates the x, y position of the entity by Delta t * Vel
-// every frame.
-Crafty.c("Velocity", {
-    init : function() {
-        this.requires("2D"); // Must have x and y position to have velocity.
-        this.bind("EnterFrame", this._velocityFrameCallback);
-        // Create the velocity object.
-        this.vel = { x:0 , y: 0 };
-    },
-    // EnterFrame Callback function
-    _velocityFrameCallback : function(data) {
-        this.x += (data.dt * this.vel.x);
-        this.y += (data.dt * this.vel.y);
-    }
-});
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Mobile
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// TODO: Refactor more - this is more or less a controller component.
 // Responds to MobMove events and updates the velocity component.
 Crafty.c("Mobile", {
     mobileSpeed : 0.05, // Default move speed
@@ -284,57 +316,13 @@ Crafty.c("Mobile", {
     }
 });
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Bearing
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Component that describes what direction an entity is facing.
-// .bearing = one of TOT.CONST.BEARING
-Crafty.c("Bearing", {
-    init : function() {
-        this._bearing = TOT.CONST.BEARING.DOWN;
-    },
-    setBearing : function(bearing) {
-        if(this._bearing !== bearing) { // Did we change orientation?
-            this.trigger("Turn", bearing); // Trigger the turn event
-        }
-        this._bearing = bearing;
-    }
-});
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// CollidesWithSolid
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Component to make an entity act 'solid' when checking hits against other Solid entities
-Crafty.c("CollidesWithSolid", {
-    init : function() {
-        this.requires("Collision");
-        this.onHit("Solid", this._handleCollidesWithSolid);
-    } , 
-    _handleCollidesWithSolid : function(hit) {
-		for(var i=0; i<hit.length; i++) {
-			if(hit[i].normal.y === 1) {
-				// Bottom
-				this.y = hit[i].obj.y + hit[i].obj.h;
-			}
-			if(hit[i].normal.y === -1) {
-				// Top
-				this.y = hit[i].obj.y - this.h;
-			}
-			if(hit[i].normal.x === 1) {
-				// Right-side of entity
-				this.x = hit[i].obj.x + hit[i].obj.w;
-			}
-			if (hit[i].normal.x === -1) {
-				// Left-side
-				this.x = hit[i].obj.x - this.w;
-			}
-		}
-		this.trigger("CollisionSolid");
-	}
-});
 
+
+// TODO: Refactor more - is there an easier way to do this ?
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // NonPlayerCharacterAI
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Component to cause entities to call a swappable think function on regular intervals.
 // aiSuspend - call thsi on the entity to suspend its think function
@@ -381,3 +369,141 @@ Crafty.c("AI", {
         this.aiToggle();
     }
 });
+
+// #################################################################################################
+// MAP COMPONENTS
+// #################################################################################################
+
+Crafty.c("ExitBlock", {
+	init: function() {
+		this.requires("Collision, Thing, placeholder_sprite");
+		this.w = 32;
+		this.h = 32;
+	},
+	nextScene: function() {
+		// Call this to move to the next scene as indicated by the map.
+		Crafty.enterScene(TOT.MAP.Mapper.current_map.exit_to);
+	},
+	finishGame: function() {
+		// Call this to load the end game screen.
+	}
+});
+
+Crafty.c("Tile", {
+	init: function() {
+		this.addComponent("Thing"); 
+	},
+	setTile : function(tileIndex) {
+		var x = tileIndex % 20; // 640 / 32
+		var y = (tileIndex / 20) | 0; // 640 / 32
+		this.sprite(x, y, 0);
+		return this;
+	}
+});
+
+Crafty.c("Block", {
+	init: function() {
+		this.addComponent("HitBox, Solid");
+	}
+	// Define hitbox on entity creation.
+});
+
+
+// #################################################################################################
+// DEPRECATE EVERYTHING BELOW THIS LINE :O
+// #################################################################################################
+
+// TODO: Deprecate me.
+Crafty.c("HUD", {
+	init: function() {
+		this.addComponent("2D, Canvas, Color");
+		this.color(64, 64, 64);
+		this.x = 0;
+		this.y = 0;
+		this.w = 128;
+		this.h = 64;
+		this.z = 512;
+		this.bind("ViewportScroll", this.update);
+	} ,
+	update : function() {
+		this.x = -(Crafty.viewport.x) + 32;
+		this.y = -(Crafty.viewport.y) + 32;
+		
+	}
+});
+
+// TODO: Deprecate me.
+Crafty.c("Thing", {
+	init: function () {
+		this.addComponent("2D, Canvas, Color");
+	},
+	location: function(x, y, z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		return this;
+	}
+});
+
+// Siigh,, we'll keep it as is 
+Crafty.c("Actionable", {
+	// For things which are actionable.
+	actualize: function() {
+		console.log("HIT!");
+	} ,
+	takeDamage : function() {
+		console.log("DAMAGE!");
+	} 
+});
+
+// TODO: Deprecate me.
+// Need a feeler in order to feel things.
+Crafty.c("Feeler", {
+	feelerHitBox : null,
+	init: function() {
+		this.requires("Thing");
+		this.feelerHitBox = Crafty.e("Thing, Collision").location(0,0,0);
+		this.feelerHitBox.action = "NONE";
+		
+		this.feelerHitBox.bind("HitOn", function(hit) {
+				for(var i = 0; i < hit.length; i++) {
+					if(this.action === "ACTUALIZE") {
+						hit[i].obj.actualize();
+					} else if (this.action === "ATTACK") {
+						hit[i].obj.takeDamage();
+					}
+				}
+				this.ignoreHits();
+			}
+		);
+		this.attach(this.feelerHitBox);
+		this.feelerHitBox.w = 4;
+		this.feelerHitBox.h = 4;
+	},
+	// Generate hit box out from face.
+	probe: function() {
+		console.log("PROBING " + this.facing);
+		var probeLength = 24;
+		var dx = this.x + (this.w / 2) | 0;
+		var dy = this.y + (this.h / 2) | 0;
+		if(this.facing === "LEFT") {
+			dx = dx - probeLength;
+		} else if (this.facing === "RIGHT") {
+			dx = dx + probeLength;
+		} else if (this.facing === "UP") {
+			dy = dy - probeLength;
+		} else if (this.facing === "DOWN") {
+			dy = dy + probeLength;
+		}
+		this.feelerHitBox.x = dx;
+		this.feelerHitBox.y = dy;
+		console.log(this.feelerHitBox.w);
+		console.log("X: " + this.x + " Y:" + this.y + " FeelerX :" + this.feelerHitBox.x + " FeelerY :" + this.feelerHitBox.y);
+		this.feelerHitBox.checkHits("Actionable");
+	},
+	stopProbing : function() {
+		console.log("STOP THE PROBE");
+		this.feelerHitBox.ignoreHits();
+	}
+});
+
