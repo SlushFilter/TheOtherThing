@@ -1,17 +1,17 @@
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Components
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Put basic components here. Specific entities will go elsewhere.
-// For first implementation, player is a separate component. Should all "living" entities be derived
-// from the same basic "mob" component?
+// For first implementation, player is a separate component. Should all "living"
+// entities be derived from the same basic "mob" component?
 
-// #################################################################################################
+// #############################################################################
 // GRAPHICS MODIFICATION COMPONENTS
-// #################################################################################################
+// #############################################################################
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // GfxBackground
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Sets z to always render the tile on the background layer.
 Crafty.c("GfxBackground", {
 	init: function() {
@@ -19,9 +19,9 @@ Crafty.c("GfxBackground", {
 	}
 });
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// GfxOverlay7
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// GfxOverlay
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Sets z to always render the tile on the overlay layer.
 Crafty.c("GfxOverlay", {
 	init: function() {
@@ -29,11 +29,12 @@ Crafty.c("GfxOverlay", {
 	}
 });
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // GfxPlayfield
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Dynamically modifies z to (hopefully) make ents with lesser Y coordinates be rendered first.
-// This will always override GfxBackground and GfxOverlay modifiers.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Dynamically modifies z to (hopefully) make ents with lesser Y coordinates be 
+// rendered first. This will always override GfxBackground and GfxOverlay 
+// modifiers.
 Crafty.c("GfxPlayfield", {
 	init: function() {
 		this.bind("PreRender", this._gfxPlayfieldPreRender);
@@ -43,43 +44,41 @@ Crafty.c("GfxPlayfield", {
 	}
 });
 
-// #################################################################################################
+// #############################################################################
 // SPACIAL / PHYSICS COMPONENTS
-// #################################################################################################
+// #############################################################################
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // HitBox
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Defines a scannable hitbox - Generally this should be used to define an entity's size in the 
-// game.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Defines a scannable hitbox - Generally this should be used to define an 
+// entity's size in the game.
 Crafty.c("HitBox", {
-	init: function() {
-		this.requires("2D");
-		this.w = 32;
-		this.h = 32;
-	} ,
-	setSize: function(width, height) {
+	init: function() { this.requires("2D"); } ,
+	setHitBox: function(width, height) {
 		this.w = width;
 		this.h = height;
 	}
 });
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Solid
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// More of a property than anything, this component defines an entity as being 'Solid'.
-// Entities with CollidesWithSolid will treat these as ... well a solid.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// More of a property than anything, this component defines an entity as being 
+// 'Solid'. Entities with CollidesWithSolid will treat these as ... well a 
+// solid.
 Crafty.c("Solid", {
 	init: function() {
 		this.requires("HitBox, Collision");
 	}
 });
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Velocity
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Creates a vel property which is simply a Crafty.math.Vector2D
-// Causes an entity to move every frame depending on what its velocity is set at.
+// Causes an entity to move every frame depending on what its velocity is set 
+// at.
 Crafty.c("Velocity", {
 	vel: null, // Crafty.math.Vector2D
     init : function() {
@@ -95,9 +94,9 @@ Crafty.c("Velocity", {
     }
 });
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Bearing
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Component that describes what direction an entity is facing.
 // bearing = one of TOT.CONST.BEARING
 Crafty.c("Bearing", {
@@ -107,17 +106,21 @@ Crafty.c("Bearing", {
 	},
     setBearing : function(newBearing) {
         if(this.bearing !== newBearing) { // Did we change orientation?
-            this.trigger("Turn", newBearing); // Trigger the turn event
+			// Trigger the turn command.
+            this.trigger("EntCmd", 
+				{ cmd: TOT.CONST.ENT_CMD.TURN,
+				  arg: [ newBearing ]}); 
         }
         this.bearing = newBearing;
     }
 });
 
 // TODO: Refactor me :)
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // CollidesWithSolid
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Component to make an entity act 'solid' when checking hits against other Solid entities
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Component to make an entity act 'solid' when checking hits against other 
+// Solid entities
 Crafty.c("CollidesWithSolid", {
     init : function() {
         this.requires("HitBox, Collision");
@@ -130,8 +133,6 @@ Crafty.c("CollidesWithSolid", {
 		for(var i=0; i < hit.length; i++) {
 			normal = hit[i].normal;
 			mbr = hit[i].obj.mbr();
-		console.log("-- Other Mbr --");
-  		    console.log(mbr);
 			if(normal.y === 1) { // Vertical collision
 				this.y = (mbr._y + mbr._h) + (this.y - sMbr._y);
 			} else if(normal.y === -1) {
@@ -142,41 +143,51 @@ Crafty.c("CollidesWithSolid", {
 			} else if(normal.x === -1) {
 				this.x = mbr._x - sMbr._w;
 			}
-			
-			//if(hit[i].normal.y === 1) {
-			//	// Bottom
-			//	this.y = hit[i].obj.y + hit[i].obj.h;
-			//}
-			//if(hit[i].normal.y === -1) {
-			//	// Top
-			//	this.y = hit[i].obj.y - this.h;
-			//}
-			//if(hit[i].normal.x === 1) {
-			//	// Right-side of entity
-			//	this.x = hit[i].obj.x + hit[i].obj.w;
-			//}
-			//if (hit[i].normal.x === -1) {
-		//		// Left-side
-		//		this.x = hit[i].obj.x - this.w;
-		//	}
 		}
 		this.trigger("CollisionSolid");
 	}
 });
 
-// #################################################################################################
+// #############################################################################
 // CONTROLLERS
-// #################################################################################################
+// #############################################################################
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// SpriteCtrl
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Used for forwarding EntCtrl messages to an attached sprite.
+// Valid sprites should contain an update function that selects an appropriate
+// animation based on the arguments passed. (see the tot.spritedef.js for
+// lots of valid controllable sprites!)
+Crafty.c("SpriteCtrl", {
+	_spriteCtrlTarget: null,
+	
+	init: function() {
+		this.bind("EntCtrl", this._spriteCtrlHandler);
+	} ,
+	
+	spriteCtrl: function(sprite) {
+		this._spriteCtrlTarget = sprite;
+		this.attach(sprite);
+		return this;
+	} ,
+	
+	_spriteCtrlHandler: function(eventArgs) {
+		// Forward the EntCtrl arguments to the sprite.
+		if(this._spriteCtrlTarget !== null) {
+			this._spriteCtrlTarget.spriteUpdate(eventArgs);
+		}
+	}
+});
 
 // TODO: Refactor this more
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Keyboard Control Components
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Pressing a key will one-shot fire an event.
 // All controller events will pass a
-// true or false value indicating if the key was pressed (true) or released (false)
-// and a direction ( described in TOT.CONST.BEARING[] )
+// true or false value indicating if the key was pressed (true) or released 
+// (false) and a direction ( described in TOT.CONST.BEARING[] )
 // example event receiver function :
 
 // actionListen : function(data) {
@@ -210,7 +221,7 @@ Crafty.c("KeyboardControl", {
 		
 		// Default keystate, setup for throwing Mob controls.
         this.keyState = [
-            { key:Crafty.keys.UP_ARROW,    event:"MobMove", state:false, args: TOT.CONST.BEARING.UP },	
+            { key:Crafty.keys.UP_ARROW,    event:"MobMove", state:false, args: TOT.CONST.BEARING.UP },  
             { key:Crafty.keys.DOWN_ARROW,  event:"MobMove", state:false, args: TOT.CONST.BEARING.DOWN },  
             { key:Crafty.keys.LEFT_ARROW,  event:"MobMove", state:false, args: TOT.CONST.BEARING.LEFT },  
             { key:Crafty.keys.RIGHT_ARROW, event:"MobMove", state:false, args: TOT.CONST.BEARING.RIGHT }, 
@@ -220,7 +231,7 @@ Crafty.c("KeyboardControl", {
         ];
 	},
 	handleKeyDown : function(keyPress) {
-		//console.log("Key Pressed: " + keypress.key);
+		console.log("Key Pressed: " + keypress.key);
 		if(keyPress.key === Crafty.keys.CAPS){
 			Crafty.trigger("ToggleControl");
 		}
@@ -260,9 +271,9 @@ Crafty.c("KeyboardControl", {
 	}
 });
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Mobile
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // TODO: Refactor more - this is more or less a controller component.
 // Responds to MobMove events and updates the velocity component.
 Crafty.c("Mobile", {
@@ -320,11 +331,11 @@ Crafty.c("Mobile", {
 
 
 // TODO: Refactor more - is there an easier way to do this ?
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // NonPlayerCharacterAI
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Component to cause entities to call a swappable think function on regular intervals.
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Component to cause entities to call a swappable think function on regular 
+// intervals.
 // aiSuspend - call thsi on the entity to suspend its think function
 // aiResume  - call this to resume a suspended think function
 // aiToggle - toggles the ai think function on and off
@@ -370,9 +381,9 @@ Crafty.c("AI", {
     }
 });
 
-// #################################################################################################
+// #############################################################################
 // MAP COMPONENTS
-// #################################################################################################
+// #############################################################################
 
 Crafty.c("ExitBlock", {
 	init: function() {
@@ -409,9 +420,9 @@ Crafty.c("Block", {
 });
 
 
-// #################################################################################################
+// #############################################################################
 // DEPRECATE EVERYTHING BELOW THIS LINE :O
-// #################################################################################################
+// #############################################################################
 
 // TODO: Deprecate me.
 Crafty.c("HUD", {

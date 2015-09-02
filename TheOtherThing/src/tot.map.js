@@ -10,7 +10,7 @@ TOT.MAP.MAPOBJECTS = [
 		TOT.MAP.Mapper.placeThing(x, y, exit_block);
 	},
 	function(x, y) { // 04 - New and improved science!
-		TOT.MAP.Mapper.placeThing(x, y, Crafty.e("NewScientist"));
+		TOT.MAP.Mapper.placeThing(x, y, Crafty.e("TestMob"));
 	}
 	
 ];
@@ -41,7 +41,8 @@ TOT.MAP.Mapper = {
 		entity.z = y + 32; // Temporary change for 2xtile-height walls
 	},
 	placeThing : function(x, y, entity) {
-		entity.location(x * this._tWidth, y * this._tHeight, 0);
+		entity.x = x * this._tWidth;
+		entity.y = y * this._tHeight;
 	},
 	// Places a blocking tile on the map.
 	placeBlock : function(x, y) {

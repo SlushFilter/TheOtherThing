@@ -6,7 +6,11 @@ var TOT = {
 	},
 	ENTS :{},
 	MAP : {},
-    CONST : {
+	
+	// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+    
+	CONST : {
+		DEBUG : true,
         BEARING : { 
             UP : 0,
             DOWN : 1,
@@ -21,6 +25,11 @@ var TOT = {
 			"RIGHT",
 			"NONE" // No Direction
 		],
+		ENT_CMD : { // Entity commands, add more if needed.
+			MOVE : 0,
+			IDLE : 1,
+			DIE : 2
+		},
 		BACKGROUND_Z : 0,
 		OVERLAY_Z : 65535
     }

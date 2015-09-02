@@ -75,7 +75,7 @@ Crafty.c("TEMP_HUMAN_SPRITE", {
 
 Crafty.c("SCIENTIST_SPRITE", {
 	init : function() {
-		this.requires("Thing, scientist_default, NPCAnimationController");
+		this.requires("scientist_default, NpcAnimationController");
 		// Animation Defs
 		this.reel("IDLE_UP", 1000, [[8, 0]]);
 		this.reel("IDLE_DOWN", 1000, [[0, 0]]);
@@ -86,67 +86,67 @@ Crafty.c("SCIENTIST_SPRITE", {
 		this.reel("WALK_LEFT", 1000, [[4,0], [5, 0], [6, 0], [7, 0]]);
 		this.reel("WALK_RIGHT", 1000, [[4,0], [5, 0], [6, 0], [7, 0]]);
 		this.reel("DIE", 1000, [[4,0], [5, 0], [6, 0], [7, 0]]);
+		// Sprite offset
+		this.x = 0;
+		this.y = -22;
+		this.animate("IDLE_DOWN", -1);
 	}
 });
 
-// TODO: Refactor, there is certainly a better way to do this.
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// NPC Animation Controller
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Rigged to change animations based on the entity's state using the magic of events.
-// This should be inherited from something that works with SpriteAnimation
+// #############################################################################
+// CONTROLLERS
+// #############################################################################
 
-// This works ... trust me.
-
-Crafty.c("NPCAnimationController", {
-	_animationControllerEnabled : true,
-	init : function() {
-		this.requires("NonPlayerCharacter, SpriteAnimation");
-		this._animationControllerAction = "IDLE";
-		this._animationControllerBearing = TOT.CONST.BEARING.DOWN;
-		this.bind("Turn", this._animationControllerTurn);
-		this.bind("MobMove", this._animationControllerMobMove);
-		this.bind("MobStop", this._animationControllerMobStop);
-		this.bind("Die", this._animationControllerDie);
+Crafty.c("NpcAnimationController", {
+	command: -1,
+	init: function() { 
+		this.requires("Canvas, Bearing, SpriteAnimation");
+	},
+	spriteUpdate: function(a) {
+		var CMD = TOT.CONST.ENT_CMD;
+		switch(a.cmd) {
+			case CMD.MOVE:
+				this._animWalk(a.arg[0]);
+				break;
+			case CMD.IDLE:
+				this._animIdle(a.arg[0]);
+				break;
+			case CMD.DIE:
+				this._animDie();
+				break;
+		}
+	},
+	
+	_animWalk: function(bearing) {
+		// Determine if an update is actually needed.
+		if(this.command === TOT.CONST.ENT_CMD.MOVE
+		&& this.bearing === bearing) { return; }
 		
-	} ,
-	toggleAnimationController : function() {
-		this._animationControllerEnabled = !this._animationControllerEnabled;
-	} ,
-	_animationControllerUpdate : function() {
-		if(this._animationControllerEnabled === false) { return; }
-		if(this.bearing < TOT.CONST.BEARING.NONE) {
-			var reelName = this._animationControllerAction + "_" + 
-				TOT.CONST.BEARING_NAMES[this.bearing];
-				if(this.bearing === TOT.CONST.BEARING.LEFT) {
-					this.flip("X");
-				} else {
-					this.unflip("X");
-				}
-			this.animate( reelName, -1 );
+		this.setBearing(bearing);
+		this._setFlipping(bearing); // Face the correct direction!
+		this.animate("WALK_" + TOT.CONST.BEARING_NAMES[bearing], -1);
+		this.command = TOT.CONST.ENT_CMD.MOVE; // Save last command
+	},
+	
+	_animIdle: function(bearing) {
+		// Determine if an update is actually needed.
+		if(this.command === TOT.CONST.ENT_CMD.IDLE
+		&& this.bearing === bearing) { return; }
+		
+		this.setBearing(bearing);
+		this._setFlipping(bearing);
+		this.animate("IDLE_" + TOT.CONST.BEARING_NAMES[this.bearing], -1);
+	},
+	
+	_animDie: function() {
+		this.animate("DIE", 1);
+	},
+	
+	_setFlipping: function(bearing) {
+		if(bearing === TOT.CONST.BEARING.LEFT) {
+			this.flip("X");
 		} else {
-			this.animate( this._animationControllerAction, -1 );
+			this.unflip("X");
 		}
-	},
-	_animationControllerTurn : function(bearing) {
-        this.bearing = bearing;
-		this._animationControllerUpdate();
-	},
-	_animationControllerMobMove : function(moveInfo) {
-		if(this.vel.x === 0 && this.vel.y === 0) {
-			this._animationControllerAction = "IDLE";
-		} else {
-			this._animationControllerAction = "WALK";
-		}
-		this._animationControllerUpdate();
-	},
-    _animationControllerMobStop : function() {
-		this._animationControllerAction = "IDLE";
-		this._animationControllerUpdate();
-    },
-	_animationControllerDie : function(dieInfo) {
-		this._animationControllerAction = "DIE";
-		this._animationConrollerBearing = TOT.CONST.BEARING.NONE;
-		this._animationControllerUpdate();
 	}
 });

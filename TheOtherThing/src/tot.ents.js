@@ -1,3 +1,4 @@
+// TODO: Deprecate me
 TOT.ENTS.CreateHud = function() {
 	var hud = Crafty.e("HUD");
 	var hudText = Crafty.e("2D, Canvas, Text").attr({ x: 8, y: 8, z:512 }).text("SUSPICION").textColor('white');
@@ -147,4 +148,29 @@ Crafty.c("Scientist",
 		this.destroy();
 		
 	}
+}); 
+
+
+
+// #############################################################################
+// TEST MOB                                                                     
+// #############################################################################
+Crafty.c("TestMob", {
+	init: function() {
+		this.requires("GfxPlayfield, HitBox, Solid, Velocity, Bearing," +
+			"CollidesWithSolid, SpriteCtrl");
+		this.setHitBox(24, 24);
+		if(TOT.CONST.DEBUG === true) { this.addComponent("SolidHitBox"); } // DEBUG
+		this.spriteCtrl(Crafty.e("SCIENTIST_SPRITE"));
+		this.trigger("EntCtrl", { cmd:0, arg:[ 0 ] });
+	}
 });
+
+
+
+
+
+
+
+
+
