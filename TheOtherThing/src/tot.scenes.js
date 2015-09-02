@@ -9,13 +9,9 @@ Crafty.defineScene("MainMenu", function() {
 Crafty.defineScene("W1M1", function() {
 	// Scene contents
 	TOT.MAP.Mapper.loadMap(TOT.DATA.MAP.W1M1);
-	if(TOT.CONST.DEBUG === true) { // DEBUG
-		jonesy = Crafty.e("TestMob").attr({ x: 256, y: 256 }); 
-	} else {
-		jonesy = Crafty.e("Player").attr({ x:256, y:256});
-	}
+	jonesy = Crafty.e("Player").attr({ x: 256, y: 256 }); 
 	Crafty.viewport.follow(jonesy, 0, 0);
-	TOT.ENTS.CreateHud();
+	//TOT.ENTS.CreateHud();
 });
 
 Crafty.defineScene("W1M2", function() {

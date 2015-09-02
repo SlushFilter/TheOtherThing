@@ -107,9 +107,7 @@ Crafty.c("Bearing", {
     setBearing : function(newBearing) {
         if(this.bearing !== newBearing) { // Did we change orientation?
 			// Trigger the turn command.
-            this.trigger("EntCmd", 
-				{ cmd: TOT.CONST.ENT_CMD.TURN,
-				  arg: [ newBearing ]}); 
+            this.trigger("Turn", newBearing); 
         }
         this.bearing = newBearing;
     }
@@ -163,21 +161,76 @@ Crafty.c("SpriteCtrl", {
 	_spriteCtrlTarget: null,
 	
 	init: function() {
-		this.bind("EntCtrl", this._spriteCtrlHandler);
+		this.bind("MobMove", this._spriteCtrlUpdate);
+		this.bind("MobStop", this._spriteCtrlUpdate);
+		this.bind("MobIdle", this._spriteCtrlUpdate);
 	} ,
-	
+	_spriteCtrlUpdate: function() {
+		// Forward the EntCtrl arguments to the sprite.
+		if(this._spriteCtrlTarget !== null) {
+			this._spriteCtrlTarget.spriteUpdate(this);
+		}
+	} ,
 	spriteCtrl: function(sprite) {
 		this._spriteCtrlTarget = sprite;
 		this.attach(sprite);
 		return this;
-	} ,
-	
-	_spriteCtrlHandler: function(eventArgs) {
-		// Forward the EntCtrl arguments to the sprite.
-		if(this._spriteCtrlTarget !== null) {
-			this._spriteCtrlTarget.spriteUpdate(eventArgs);
-		}
 	}
+});
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Mobile
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Responds to MobMove events and updates the velocity component.
+Crafty.c("Mobile", {
+    mobileSpeed : 0.05, // Default move speed
+	init : function() {
+        this.requires("Velocity, Bearing");
+        this._mobileImpulse = [ // Move register
+            { s:0, n:-1 }, // Index = TOT.CONST.BEARING.UP
+            { s:0, n: 1 }, // TOT.CONST.BEARING.DOWN
+            { s:0, n:-1 }, // TOT.CONST.BEARING.LEFT
+            { s:0, n: 1 }  // TOT.CONST.BEARING.RIGHT
+        ];
+		this.bind("MobMove", this._mobileHandleMobMove);
+        this.bind("MobStop", this._mobileHandleMobStop);
+	} ,
+    _mobileHandleMobStop : function() {
+    } ,
+    // Handle a MobMove command
+    _mobileHandleMobMove : function(data) {
+        // Update the move registers.
+        var impulseReg = this._mobileImpulse[data.args];
+		var dir = data.args;
+		
+        if(data.state === true) {
+            this._mobileImpulse[dir].s = this._mobileImpulse[dir].n * this.mobileSpeed;
+        } else {
+            this._mobileImpulse[dir].s = 0;
+        }
+        // Figure out velocity vector.
+		this.vel.x = this._mobileImpulse[TOT.CONST.BEARING.LEFT].s +
+                     this._mobileImpulse[TOT.CONST.BEARING.RIGHT].s;
+        this.vel.y = this._mobileImpulse[TOT.CONST.BEARING.UP].s +
+                     this._mobileImpulse[TOT.CONST.BEARING.DOWN].s;
+		// Figure out what direction we're facing (favor up and down)
+		if(this.vel.y < 0) { dir = TOT.CONST.BEARING.UP;
+		} else if (this.vel.y > 0) { 
+			dir = TOT.CONST.BEARING.DOWN;
+		} else if (this.vel.x < 0) { 
+			dir = TOT.CONST.BEARING.LEFT;
+		} else if (this.vel.x > 0) { 
+			dir = TOT.CONST.BEARING.RIGHT;
+		}
+		this.setBearing(dir);
+    },
+    _mobileHandleMobStop : function() {
+        this.vel.x = 0;
+        this.vel.y = 0;
+        for(var i = 0; i < this._mobileImpulse.length; i++) {
+            this._mobileImpulse[i].s = 0;
+        }
+    }
 });
 
 // TODO: Refactor this more
@@ -231,7 +284,7 @@ Crafty.c("KeyboardControl", {
         ];
 	},
 	handleKeyDown : function(keyPress) {
-		console.log("Key Pressed: " + keypress.key);
+		//console.log("Key Pressed: " + keypress.key);
 		if(keyPress.key === Crafty.keys.CAPS){
 			Crafty.trigger("ToggleControl");
 		}
@@ -271,61 +324,7 @@ Crafty.c("KeyboardControl", {
 	}
 });
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Mobile
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// TODO: Refactor more - this is more or less a controller component.
-// Responds to MobMove events and updates the velocity component.
-Crafty.c("Mobile", {
-    mobileSpeed : 0.05, // Default move speed
-	init : function() {
-        this.requires("Velocity, Bearing");
-        this._mobileImpulse = [ // Move register
-            { s:0, n:-1 }, // Index = TOT.CONST.BEARING.UP
-            { s:0, n: 1 }, // TOT.CONST.BEARING.DOWN
-            { s:0, n:-1 }, // TOT.CONST.BEARING.LEFT
-            { s:0, n: 1 }  // TOT.CONST.BEARING.RIGHT
-        ];
-		this.bind("MobMove", this._mobileHandleMobMove);
-        this.bind("MobStop", this._mobileHandleMobStop);
-	} ,
-    _mobileHandleMobStop : function() {
-    } ,
-    // Handle a MobMove command
-    _mobileHandleMobMove : function(data) {
-        // Update the move registers.
-        var impulseReg = this._mobileImpulse[data.args];
-		var dir = data.args;
-		
-        if(data.state === true) {
-            this._mobileImpulse[dir].s = this._mobileImpulse[dir].n * this.mobileSpeed;
-        } else {
-            this._mobileImpulse[dir].s = 0;
-        }
-        // Figure out velocity vector.
-		this.vel.x = this._mobileImpulse[TOT.CONST.BEARING.LEFT].s +
-                     this._mobileImpulse[TOT.CONST.BEARING.RIGHT].s;
-        this.vel.y = this._mobileImpulse[TOT.CONST.BEARING.UP].s +
-                     this._mobileImpulse[TOT.CONST.BEARING.DOWN].s;
-		// Figure out what direction we're facing (favor up and down)
-		if(this.vel.y < 0) { dir = TOT.CONST.BEARING.UP;
-		} else if (this.vel.y > 0) { 
-			dir = TOT.CONST.BEARING.DOWN;
-		} else if (this.vel.x < 0) { 
-			dir = TOT.CONST.BEARING.LEFT;
-		} else if (this.vel.x > 0) { 
-			dir = TOT.CONST.BEARING.RIGHT;
-		}
-		this.setBearing(dir);
-    },
-    _mobileHandleMobStop : function() {
-        this.vel.x = 0;
-        this.vel.y = 0;
-        for(var i = 0; i < this._mobileImpulse.length; i++) {
-            this._mobileImpulse[i].s = 0;
-        }
-    }
-});
+
 
 
 
@@ -400,14 +399,26 @@ Crafty.c("ExitBlock", {
 	}
 });
 
-Crafty.c("Tile", {
+Crafty.c("FloorTile", {
 	init: function() {
-		this.addComponent("Thing"); 
+		this.addComponent("2D, Canvas, Color, GfxBackground");
 	},
 	setTile : function(tileIndex) {
 		var x = tileIndex % 20; // 640 / 32
 		var y = (tileIndex / 20) | 0; // 640 / 32
-		this.sprite(x, y, 0);
+		this.sprite(x, y);
+		return this;
+	}
+});
+
+Crafty.c("OverlayTile", {
+	init: function() {
+		this.addComponent("2D, Canvas, Color, GfxOverlay");
+	},
+	setTile : function(tileIndex) {
+		var x = tileIndex % 20; // 640 / 32
+		var y = (tileIndex / 20) | 0; // 640 / 32
+		this.sprite(x, y);
 		return this;
 	}
 });

@@ -158,11 +158,10 @@ Crafty.c("Scientist",
 Crafty.c("TestMob", {
 	init: function() {
 		this.requires("GfxPlayfield, HitBox, Solid, Velocity, Bearing," +
-			"CollidesWithSolid, SpriteCtrl");
+			"CollidesWithSolid, AI_Wander, Mobile, SpriteCtrl");
 		this.setHitBox(24, 24);
-		if(TOT.CONST.DEBUG === true) { this.addComponent("SolidHitBox"); } // DEBUG
+		//if(TOT.CONST.DEBUG === true) { this.addComponent("SolidHitBox"); } // DEBUG
 		this.spriteCtrl(Crafty.e("SCIENTIST_SPRITE"));
-		this.trigger("EntCtrl", { cmd:0, arg:[ 0 ] });
 	}
 });
 

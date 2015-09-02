@@ -6,12 +6,11 @@ TOT.SpawnPlayer = function(x, y) {
 // Player Entity overhaul
 Crafty.c("Player", {
     init : function() {
-        this.requires("NonPlayerCharacter, KeyboardControl, SCIENTIST_SPRITE");
-        //this.addComponent("WiredHitBox");
-        //this.w = 24;
-        //this.h = 24;
-		//this.attach(Crafty.e("JONES_SPRITE").location(-4, -6, 0));
-		this.collision([0, this.h - 24], [this.w, this.h - 24], [this.w, this.h], [0, this.h]);
+		this.requires("GfxPlayfield, HitBox, Solid, Velocity, Bearing," +
+			"CollidesWithSolid, KeyboardControl, Mobile, SpriteCtrl");
+		this.setHitBox(24, 24);
+		if(TOT.CONST.DEBUG === true) { this.addComponent("SolidHitBox"); } // DEBUG
+		this.spriteCtrl(Crafty.e("SCIENTIST_SPRITE"));
 		this.bind("Act", this._handleAct);
     } ,
 	_handleAct : function(data) {

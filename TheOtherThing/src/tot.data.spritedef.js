@@ -75,7 +75,7 @@ Crafty.c("TEMP_HUMAN_SPRITE", {
 
 Crafty.c("SCIENTIST_SPRITE", {
 	init : function() {
-		this.requires("scientist_default, NpcAnimationController");
+		this.requires("scientist_default, GfxPlayfield, NpcAnimationController");
 		// Animation Defs
 		this.reel("IDLE_UP", 1000, [[8, 0]]);
 		this.reel("IDLE_DOWN", 1000, [[0, 0]]);
@@ -98,48 +98,30 @@ Crafty.c("SCIENTIST_SPRITE", {
 // #############################################################################
 
 Crafty.c("NpcAnimationController", {
-	command: -1,
 	init: function() { 
-		this.requires("Canvas, Bearing, SpriteAnimation");
+		this.requires("Canvas, SpriteAnimation");
 	},
-	spriteUpdate: function(a) {
-		var CMD = TOT.CONST.ENT_CMD;
-		switch(a.cmd) {
-			case CMD.MOVE:
-				this._animWalk(a.arg[0]);
-				break;
-			case CMD.IDLE:
-				this._animIdle(a.arg[0]);
-				break;
-			case CMD.DIE:
-				this._animDie();
-				break;
+	spriteUpdate: function(self) {
+		// Animation affixes.
+		var prefix = "";
+		var suffix = "";
+
+		// TODO: Are we dead? :)
+		
+		suffix = TOT.CONST.BEARING_NAMES[self.bearing];
+		this._setFlipping(self.bearing);
+		
+		// Are we moving?
+		if(self.vel.x !== 0 || self.vel.y !== 0) {
+			prefix = "WALK_";
+		} else { 
+			prefix = "IDLE_";
 		}
-	},
-	
-	_animWalk: function(bearing) {
-		// Determine if an update is actually needed.
-		if(this.command === TOT.CONST.ENT_CMD.MOVE
-		&& this.bearing === bearing) { return; }
 		
-		this.setBearing(bearing);
-		this._setFlipping(bearing); // Face the correct direction!
-		this.animate("WALK_" + TOT.CONST.BEARING_NAMES[bearing], -1);
-		this.command = TOT.CONST.ENT_CMD.MOVE; // Save last command
-	},
-	
-	_animIdle: function(bearing) {
-		// Determine if an update is actually needed.
-		if(this.command === TOT.CONST.ENT_CMD.IDLE
-		&& this.bearing === bearing) { return; }
-		
-		this.setBearing(bearing);
-		this._setFlipping(bearing);
-		this.animate("IDLE_" + TOT.CONST.BEARING_NAMES[this.bearing], -1);
-	},
-	
-	_animDie: function() {
-		this.animate("DIE", 1);
+		var reelName = prefix + suffix;
+		if(this.isPlaying(reelName) === false) {
+			this.animate(reelName, -1);
+		}
 	},
 	
 	_setFlipping: function(bearing) {

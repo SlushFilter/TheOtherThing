@@ -30,7 +30,6 @@ TOT.MAP.Mapper = {
 	place : function (x, y, entity) {
 		entity.x = x * this._tWidth;
 		entity.y = y * this._tHeight;
-		entity.z = -16;
 	},
 	
 	// Placea a 'wall' tile with z = the entity's y coordinate 
@@ -38,7 +37,6 @@ TOT.MAP.Mapper = {
 	placeWall : function(x, y, entity) {
 		entity.x = x * this._tWidth;
 		entity.y = y * this._tHeight;
-		entity.z = y + 32; // Temporary change for 2xtile-height walls
 	},
 	placeThing : function(x, y, entity) {
 		entity.x = x * this._tWidth;
@@ -68,11 +66,11 @@ TOT.MAP.Mapper = {
 				floor = data.floor[y][x];
 				if(floor !== 0) {
 					// Pick the appropriate tile
-					this.place(x, y, Crafty.e("Tile, tileset").setTile(floor));
+					this.place(x, y, Crafty.e("FloorTile, tileset").setTile(floor));
 				}
 				wall = data.wall[y][x];
 				if(wall !== 0) {
-					this.placeWall(x, y, Crafty.e("Tile, tileset").setTile(wall));
+					this.placeWall(x, y, Crafty.e("OverlayTile, tileset").setTile(wall));
 				}
 				attr = data.attr[y][x];
 				if(attr > 0) {
