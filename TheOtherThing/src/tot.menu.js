@@ -39,29 +39,29 @@ Crafty.c("Selectionable", {
 			this.selection_objects_array[this.selection_current].actionExecute(this);
 		});
 		
-		this.bind("KeyDown", function(keypress){
-			if (keypress.key === this.SELECTION_UP){
+		// this.bind("KeyDown", function(keypress){
+			// if (keypress.key === this.SELECTION_UP){
 				// Move the selection indicator up.
-				if(this.selection_current > 0){
-					this.selection_current--;
-				} else {
-					this.selection_current = this.selection_max;
-				};
-				Crafty.audio.play("select_sound");
-				this.redrawSelectionText();
-			}
-			if (keypress.key === this.SELECTION_DOWN){
+				// if(this.selection_current > 0){
+					// this.selection_current--;
+				// } else {
+					// this.selection_current = this.selection_max;
+				// };
+				// Crafty.audio.play("select_sound");
+				// this.redrawSelectionText();
+			// }
+			// if (keypress.key === this.SELECTION_DOWN){
 				// Move the selection indicator down.
-				if(this.selection_current < this.selection_max){
-					this.selection_current++;
-				} else {
-					this.selection_current = 0;
-				};
-				Crafty.audio.play("select_sound");
-				this.redrawSelectionText();
-			}
-			if (keypress.key === this.SELECTION_EXECUTE){
-				Crafty.audio.play("selection_execute_sound");
+				// if(this.selection_current < this.selection_max){
+					// this.selection_current++;
+				// } else {
+					// this.selection_current = 0;
+				// };
+				// Crafty.audio.play("select_sound");
+				// this.redrawSelectionText();
+			// }
+			// if (keypress.key === this.SELECTION_EXECUTE){
+				// Crafty.audio.play("selection_execute_sound");
 				// Check for dialog exit.
 				// Load next dialog.
 				// if(this.selection_objects_array[this.selection_current].RESULT === 2){
@@ -84,9 +84,9 @@ Crafty.c("Selectionable", {
 					// this.assimilating = true;
 					// this.destroy();
 				// };
-				this.selection_objects_array[this.selection_current].actionExecute(this);
-			}
-		});
+				// this.selection_objects_array[this.selection_current].actionExecute(this);
+			// }
+		// });
 	},
 	
 	// Load the selectionables.
@@ -139,14 +139,6 @@ Crafty.c("Selectionable", {
 	
 });
 
-// Layout prototype.
-function MenuLayout(){
-	this.height;
-	this.width;
-	this.x;
-	this.y;
-};
-
 Crafty.c("Menu", {
 	// TODO: Make these bastard scientists stop moving while we're talking to them!
 	text_width: 300,
@@ -156,40 +148,46 @@ Crafty.c("Menu", {
 	talker: null, // Reference to the entity who is talking.
 	assimilating: false, // So we can properly re-enable movement controls when not assimilating.
 	
-	viewport_w: null,
-	viewport_h: null,
-	viewport_x: null,
-	viewport_y: null,
-	menuHeight: null,
-	menuWidth: null,
-	_ofsX: null,
-	_ofsY: null,
-	menuX: null,
-	menuY: null,
-	
-	default_layouts: [],
+	default_layouts: [
+		{
+			// Layout 0: Dialog window centered and takes up 75% of the screen. Main text centered in top 1/3 of window. Selection text centered in bottom 2/3.
+			x: null,
+			y: null,
+			width: null,
+			height: null,
+			ofsX: null,
+			ofsY: null,
+			setLayout: function(viewport_object) {
+				this.height = 0.5 * viewport_object._h;
+				this.width = 0.75 * viewport_object._w;
+				this.ofsX = (viewport_object._w - this.width) / 2;
+				this.ofsY = (viewport_object._h - this.height) / 2;
+				this.x = viewport_object._x + this.ofsX;
+				this.y = viewport_object._y + this.ofsY;
+			},
+		},
+		// Layout 1: Dialog window centered in bottom 1/3 of screen. Images dynamically positioned in top 2/3 of screen. Text as in Layout 1.
+		
+		// Layout 2: Dialog window positioned in right or left 1/2 of screen. Images dynamically positioned in opposite 1/2. Text as in other layouts.
+	],
+	current_layout: null,
 	
 	init: function(){
+		console.log("Creating menu.");
 		this.requires("Thing, Selectionable");
 		Crafty.audio.play("selection_execute_sound");
 		
-		// Generate default layouts.
-		this.viewport_w = Crafty.viewport.rect_object._w;
-		this.viewport_h = Crafty.viewport.rect_object._h;
-		this.viewport_x = Crafty.viewport.rect_object._x;
-		this.viewport_y = Crafty.viewport.rect_object._y;
-		// Layout 0: Dialog window centered and takes up 75% of the screen. Main text centered in top 1/3 of window. Selection text centered in bottom 2/3.
-		this.default_layouts[0] = new MenuLayout();
-		this.default_layouts[0].height = 0.5 * this.viewport_h;
-		this.default_layouts[0].width = 0.75 * this.viewport_w;
-		this._ofsX = (this.viewport_w - this.default_layouts[0].width) / 2;
-		this._ofsY = (this.viewport_h - this.default_layouts[0].height) / 2;
-		this.default_layouts[0].x = this.viewport_x + this._ofsX;
-		this.default_layouts[0].y = this.viewport_y + this._ofsY;
-		// Layout 1: Dialog window centered in bottom 1/3 of screen. Images dynamically positioned in top 2/3 of screen. Text as in Layout 1.
-		// Layout 2: Dialog window positioned in right or left 1/2 of screen. Images dynamically positioned in opposite 1/2. Text as in other layouts.
+		// Generate layout.
+		this.setLayout(0);
 		
-	} , 
+	} ,
+	
+	setLayout: function(layout_index) {
+		// Set current layout
+		
+		this.current_layout = this.default_layouts[layout_index];
+		this.current_layout.setLayout(Crafty.viewport.rect_object);
+	},
 	
 	loadDialog: function(dialogArray) {
 		this.dialog_tree = dialogArray;
@@ -198,15 +196,12 @@ Crafty.c("Menu", {
 			if(!this.assimilating){
 				Crafty.trigger("ToggleControl");
 			};
-			console.log(this.talker);
 		});
 		
-		// Select layout, then set menu window dimensions and position, then load text and position.
-		
-		this.menu = Crafty.e("MenuBackground").setAttr(this.default_layouts[0]).color("blue");
+		// Create MenuBackground entity and set dimensions & color
+		this.menu = Crafty.e("MenuBackground").setAttr(this.current_layout).color("blue");
 		this.attach(this.menu);
 		
-		// Display menu background.
 		// this.menu = Crafty.e("MenuBackground").color("blue");
 		this.cursor = Crafty.e("MenuSelector");
 		this.attach(this.cursor);
@@ -313,34 +308,35 @@ Crafty.c("TopMenu", {
 		
 		this.start_game_text = Crafty.e("2D, DOM, Text");
 		// TODO: Center this text.
-		this.start_game_text.attr({ x: this.menu.x + (this.menu.w / 2) - (150), y: this.menu.y + 30 + this.title_sprite.h, w: 300 }).text("Press ENTER key to begin.<br>Press I key for instructions.").textColor("red").textFont({size: "23px"});
+		this.start_game_text.attr({ x: this.menu.x + (this.menu.w / 2) - (150), y: this.menu.y + 30 +this.title_sprite.h, w: 300 }).text("Press ENTER key to begin.<br>Press I key for instructions.").textColor("red").textFont({size: "23px"});
 		
 		this.attach(this.start_game_text);
 		this.attach(this.menu);
 		
 		// Keybind.
 		// TODO: Move to separate component. Or merge with Selectionable component.
-		this.bind("KeyDown", function(keypress) {
+		this.bind("Act", function(keypress) { //Y U NO CATCH EVENT?
 			if(!this.in_help_screen){
-				if(keypress.key === Crafty.keys.ENTER) {
-					console.log("Enter key pressed!");
-					Crafty.audio.play("game_start_sound");
-					this.unbind("KeyDown");
-					this.destroy();
-					Crafty.enterScene("W1M1");
-				} else if(keypress.key === Crafty.keys.I) {
-					// Hax.
-					// TODO: Make this better.
-					this.help_screen = Crafty.e("2D, DOM, help_screen").attr({x: Crafty.viewport.rect_object._x, y: Crafty.viewport.rect_object._y});
-					this.help_text = Crafty.e("Text, 2D, DOM").text("Press any key to return to menu.").textColor("white");
-					// Yeah, this needs to be dynamically centered as well.
-					this.help_text.attr({ w: 400, x: 150, y: 400 }).textFont({ size: "23px" });
-					this.help_screen.attach(this.help_text);
-					this.toggleHelp();
-				};
-			} else {
-				this.help_screen.destroy();
+				console.log("Enter key pressed!");
+				Crafty.audio.play("game_start_sound");
+				this.unbind("Act");
+				this.destroy();
+				Crafty.enterScene("W1M1");
+			};
+		});
+		this.bind("KeyDown", function(keypress) {
+			if(keypress.key === Crafty.keys.I && !this.in_help_screen) {
+				// Hax.
+				// TODO: Make this better.
+				this.help_screen = Crafty.e("2D, DOM, help_screen").attr({x: Crafty.viewport.rect_object._x, y: Crafty.viewport.rect_object._y});
+				this.help_text = Crafty.e("Text, 2D, DOM").text("Press any key to return to menu.").textColor("white");
+				// Yeah, this needs to be dynamically centered as well.
+				this.help_text.attr({ w: 400, x: 150, y: 400 }).textFont({ size: "23px" });
+				this.help_screen.attach(this.help_text);
 				this.toggleHelp();
+			} else if (this.in_help_screen){
+				this.help_screen.destroy();
+				this.toggleHelp();				
 			};
 		});
 	},

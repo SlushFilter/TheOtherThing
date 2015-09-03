@@ -168,7 +168,7 @@ Crafty.c("KeyboardControl", {
         ];
 	},
 	handleKeyDown : function(keyPress) {
-		//console.log("Key Pressed: " + keypress.key);
+		// console.log("Key Pressed: " + keyPress.key);
 		if(keyPress.key === Crafty.keys.CAPS){
 			Crafty.trigger("ToggleControl");
 		}
@@ -179,6 +179,7 @@ Crafty.c("KeyboardControl", {
 			if(keyPress.key === this.keyState[i].key) {
 				this.keyState[i].state = true;
 				this.trigger(this.keyState[i].event, this.keyState[i]);
+				console.log(`Triggered ${this.keyState[i].event}`);
                 return;
 			}
 		}
