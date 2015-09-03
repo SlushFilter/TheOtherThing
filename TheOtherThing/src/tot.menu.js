@@ -148,7 +148,7 @@ Crafty.c("Menu", {
 	talker: null, // Reference to the entity who is talking.
 	assimilating: false, // So we can properly re-enable movement controls when not assimilating.
 	
-	default_layouts: [
+	default_layouts: [ // TODO: Prototype for layout object.
 		{
 			// Layout 0: Dialog window centered and takes up 75% of the screen. Main text centered in top 1/3 of window. Selection text centered in bottom 2/3.
 			x: null,
@@ -164,11 +164,43 @@ Crafty.c("Menu", {
 				this.ofsY = (viewport_object._h - this.height) / 2;
 				this.x = viewport_object._x + this.ofsX;
 				this.y = viewport_object._y + this.ofsY;
-			},
+			}
 		},
-		// Layout 1: Dialog window centered in bottom 1/3 of screen. Images dynamically positioned in top 2/3 of screen. Text as in Layout 1.
-		
-		// Layout 2: Dialog window positioned in right or left 1/2 of screen. Images dynamically positioned in opposite 1/2. Text as in other layouts.
+		{
+			// Layout 1: Dialog window centered in bottom 1/2 of screen. Images dynamically positioned in top 1/2 of screen. Text as in Layout 1.
+			x: null,
+			y: null,
+			width: null,
+			height: null,
+			ofsX: null,
+			ofsY: null,
+			setLayout: function(viewport_object){
+				this.height = 0.5 * viewport_object._h;
+				this.width = 0.85 * viewport_object._w;
+				this.ofsX = (viewport_object._w - this.width) / 2;
+				this.ofsY = viewport_object._h - this.height;
+				this.x = viewport_object._x + this.ofsX;
+				this.y = viewport_object._y + this.ofsY;
+				
+			}
+		},
+		{
+			// Layout 2: Dialog window positioned in right or left 1/2 of screen. Images dynamically positioned in opposite 1/2. Text as in other layouts.
+			x: null,
+			y: null,
+			width: null,
+			height: null,
+			ofsX: null,
+			ofsY: null,
+			setLayout: function(viewport_object){
+				this.height = 0.95 * viewport_object._h;
+				this.width = 0.5 * viewport_object._w;
+				this.ofsX = viewport_object._w - this.width;
+				this.ofsY = (viewport_object._h - this.height) / 2;
+				this.x = viewport_object._x + this.ofsX;
+				this.y = viewport_object._y + this.ofsY;
+			}
+		},
 	],
 	current_layout: null,
 	
@@ -178,7 +210,7 @@ Crafty.c("Menu", {
 		Crafty.audio.play("selection_execute_sound");
 		
 		// Generate layout.
-		this.setLayout(0);
+		this.setLayout(1);
 		
 	} ,
 	
@@ -300,7 +332,7 @@ Crafty.c("TopMenu", {
 	},
 	
 	init: function(){
-		this.requires("MenuBackground"); // Not really used, but implementation may change.
+		this.requires("MenuBackground, KeyboardControl"); // Not really used, but implementation may change.
 		this.menu = Crafty.e("MenuBackground").color("black");
 		this.title_sprite = Crafty.e("title_1, 2D, DOM");
 		this.title_sprite.attr( { x: this.menu.x + (this.menu.w / 2) - (this.title_sprite.w / 2), 
@@ -315,13 +347,12 @@ Crafty.c("TopMenu", {
 		
 		// Keybind.
 		// TODO: Move to separate component. Or merge with Selectionable component.
-		this.bind("Act", function(keypress) { //Y U NO CATCH EVENT?
+		this.bind("Act", function(keypress) {
 			if(!this.in_help_screen){
-				console.log("Enter key pressed!");
 				Crafty.audio.play("game_start_sound");
 				this.unbind("Act");
 				this.destroy();
-				Crafty.enterScene("W1M1");
+				Crafty.enterScene("W1M1"); // Should this be before destroy()?
 			};
 		});
 		this.bind("KeyDown", function(keypress) {

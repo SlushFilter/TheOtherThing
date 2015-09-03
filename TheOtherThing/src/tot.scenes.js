@@ -2,7 +2,6 @@
 
 Crafty.defineScene("MainMenu", function() {
 	console.log("Loading main menu.");
-	jonesy = Crafty.e("Player");
 	Crafty.e("TopMenu");
 });
 
