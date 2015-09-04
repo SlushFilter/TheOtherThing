@@ -45,7 +45,7 @@ Crafty.c("GfxPlayfield", {
 });
 
 // #############################################################################
-// SPACIAL / PHYSICS COMPONENTS
+// GAME MECHANIC PROPERTIES
 // #############################################################################
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -58,6 +58,10 @@ Crafty.c("HitBox", {
 	setHitBox: function(width, height) {
 		this.w = width;
 		this.h = height;
+	},
+	// Returns a coordinate at the center of mass as an array [x, y]
+	getCenter: function() {
+		return [this.x + (this.w / 2), this.y + (this.h / 2)];
 	}
 });
 
@@ -146,6 +150,20 @@ Crafty.c("CollidesWithSolid", {
 	}
 });
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// ClassInfo
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// A property that tells game-specific class information about this entity.
+Crafty.c("ClassInfo", {
+	classInfo: null,
+	init: function(){
+		this.classInfo = { 
+			job: "NONE",
+			gender: "NONE"
+		}
+	}
+});
+
 // #############################################################################
 // CONTROLLERS
 // #############################################################################
@@ -164,6 +182,7 @@ Crafty.c("SpriteCtrl", {
 		this.bind("MobMove", this._spriteCtrlUpdate);
 		this.bind("MobStop", this._spriteCtrlUpdate);
 		this.bind("MobIdle", this._spriteCtrlUpdate);
+		this.bind("Turn", this._spriteCtrlUpdate);
 	} ,
 	_spriteCtrlUpdate: function() {
 		// Forward the EntCtrl arguments to the sprite.
@@ -233,7 +252,6 @@ Crafty.c("Mobile", {
     }
 });
 
-// TODO: Refactor this more
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Keyboard Control Components
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -324,12 +342,6 @@ Crafty.c("KeyboardControl", {
 	}
 });
 
-
-
-
-
-
-// TODO: Refactor more - is there an easier way to do this ?
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // NonPlayerCharacterAI
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -378,6 +390,19 @@ Crafty.c("AI", {
         if(this._aiSuspend === false) { return; }
         this.aiToggle();
     }
+});
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Actionable
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Actionable entities have an actualize function. The argument passed is the
+// entity that activated it.
+Crafty.c("Actionable", {
+	// For things which are actionable.
+	// Override this function in the entity code.
+	actualize: function(actor) {
+		console.log("Actualize : [" + actor.getId() + "]-act->[" + this.getId() + "]");
+	}
 });
 
 // #############################################################################
@@ -430,102 +455,109 @@ Crafty.c("Block", {
 	// Define hitbox on entity creation.
 });
 
+// #############################################################################
+// AI COMPONENTS
+// #############################################################################
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// AI_Braindead
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Makes an entity do nothing, however it does NOT make them un-actionable.
+Crafty.c("AI_BrainDead", {
+	init : function() {
+		this.requires("AI");
+		this.aiSetThink(function() { }); // Derp Im Braindead
+	}
+});
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// AI_Wander
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Makes an entity wander aimlessly.
+Crafty.c("AI_Wander", {
+	init: function() {
+		this.requires("AI");
+        this.aiSetThink(this._AI_Wander);
+		this.bind("CollisionSolid", this._handleCollisionSolid);
+	} ,
+	// Behavior when running into a wall.
+	_handleCollisionSolid : function(hit) { 
+		this.trigger("MobStop");
+	} ,
+	_AI_Wander : function() {
+		var bearing = Crafty.math.randomInt(0, 7);
+		if(bearing >= TOT.CONST.BEARING.NONE)  { // Causes the mob to idle.
+			this.trigger("MobStop");
+		} else { // Otherwise make the mob move in a direction.
+			this.trigger("MobIdle");
+			this.trigger("MobMove", { state:true, args:bearing });
+		}
+	}
+});
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// AI_Patrol
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// (Untested)
+// Causes an entity to walk to a given coordinate list, pausing briefly at 
+// each waypoint. This code is extremely dumb, so, its best if the waypoints
+// are all in line of sight.
+Crafty.c("AI_Patrol", {
+	// An array of x y coordinate pairs: [ [x, y], [x, y], ... ]
+	// Marking a patrol route
+	_patrolWaypoints: null,
+	_patrolIndex: 0,
+	
+	init: function() {
+		this.requires("AI, Mobile");
+        this.aiSetThink(this._AI_Patrol);
+		this._patrolWaypoints = [];
+	},
+	
+	_AI_Patrol: function() {
+		var wx, wy; // waypoint coords.
+		
+		if(_patrolWaypoints.length === 0) {
+				console.log("AI_Patrol : No waypoints!"); 
+				return;
+			}
+		wx = this._patrolWaypoints[_patrolIndex][0];
+		wy = this._patrolWaypoints[_patrolIndex][1];
+		// Are we there yet ?
+		if(this.contains(wx, wy, 1, 1) === true) {
+			this._patrolNextWaypoint();
+			wx = this._patrolWaypoints[_patrolIndex][0];
+			wy = this._patrolWaypoints[_patrolIndex][1];
+		}
+		// Adjust our heading (if needed)
+		this.vel.x = wx - this.x;
+		this.vel.y = wy - this.y;
+		this.vel.normalize();
+		this.vel.scale(this.mobileSpeed);
+		// Finally, adjust our bearing.
+		var bearing = 0;
+		if(Crafty.math.abs(this.vel.x) > Crafty.math.abs(this.vel.y)) { // Moving horizontally.
+			if(this.vel.x < 0) {// moving left
+				bearing = TOT.CONST.BEARING.LEFT;
+			} else { // moving right
+				bearing = TOT.CONST.BEARING.RIGHT;
+			}
+		} else {
+			if(this.vel.y < 0) { // moving up
+				bearing = TOT.CONST.BEARING.UP;
+			} else { // moving down
+				bearing = TOT.CONST.BEARING.DOWN;
+			}
+		}
+	},
+	_patrolNextWaypoint: function() {
+		this._patrolIndex = (this._patrolIndex + 1) % this._patrolWaypoints.length;
+	},
+	patrolAddWaypoint: function(waypoint) {
+		this._patrolWaypoints.push(waypoint);
+	}
+});
 
 // #############################################################################
 // DEPRECATE EVERYTHING BELOW THIS LINE :O
 // #############################################################################
-
-// TODO: Deprecate me.
-Crafty.c("HUD", {
-	init: function() {
-		this.addComponent("2D, Canvas, Color");
-		this.color(64, 64, 64);
-		this.x = 0;
-		this.y = 0;
-		this.w = 128;
-		this.h = 64;
-		this.z = 512;
-		this.bind("ViewportScroll", this.update);
-	} ,
-	update : function() {
-		this.x = -(Crafty.viewport.x) + 32;
-		this.y = -(Crafty.viewport.y) + 32;
-		
-	}
-});
-
-// TODO: Deprecate me.
-Crafty.c("Thing", {
-	init: function () {
-		this.addComponent("2D, Canvas, Color");
-	},
-	location: function(x, y, z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		return this;
-	}
-});
-
-// Siigh,, we'll keep it as is 
-Crafty.c("Actionable", {
-	// For things which are actionable.
-	actualize: function() {
-		console.log("HIT!");
-	} ,
-	takeDamage : function() {
-		console.log("DAMAGE!");
-	} 
-});
-
-// TODO: Deprecate me.
-// Need a feeler in order to feel things.
-Crafty.c("Feeler", {
-	feelerHitBox : null,
-	init: function() {
-		this.requires("Thing");
-		this.feelerHitBox = Crafty.e("Thing, Collision").location(0,0,0);
-		this.feelerHitBox.action = "NONE";
-		
-		this.feelerHitBox.bind("HitOn", function(hit) {
-				for(var i = 0; i < hit.length; i++) {
-					if(this.action === "ACTUALIZE") {
-						hit[i].obj.actualize();
-					} else if (this.action === "ATTACK") {
-						hit[i].obj.takeDamage();
-					}
-				}
-				this.ignoreHits();
-			}
-		);
-		this.attach(this.feelerHitBox);
-		this.feelerHitBox.w = 4;
-		this.feelerHitBox.h = 4;
-	},
-	// Generate hit box out from face.
-	probe: function() {
-		console.log("PROBING " + this.facing);
-		var probeLength = 24;
-		var dx = this.x + (this.w / 2) | 0;
-		var dy = this.y + (this.h / 2) | 0;
-		if(this.facing === "LEFT") {
-			dx = dx - probeLength;
-		} else if (this.facing === "RIGHT") {
-			dx = dx + probeLength;
-		} else if (this.facing === "UP") {
-			dy = dy - probeLength;
-		} else if (this.facing === "DOWN") {
-			dy = dy + probeLength;
-		}
-		this.feelerHitBox.x = dx;
-		this.feelerHitBox.y = dy;
-		console.log(this.feelerHitBox.w);
-		console.log("X: " + this.x + " Y:" + this.y + " FeelerX :" + this.feelerHitBox.x + " FeelerY :" + this.feelerHitBox.y);
-		this.feelerHitBox.checkHits("Actionable");
-	},
-	stopProbing : function() {
-		console.log("STOP THE PROBE");
-		this.feelerHitBox.ignoreHits();
-	}
-});
-

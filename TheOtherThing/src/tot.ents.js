@@ -5,34 +5,6 @@ TOT.ENTS.CreateHud = function() {
 	hud.attach(hudText);
 }
 
-Crafty.c("AI_BrainDead", {
-	init : function() {
-		this.requires("AI");
-		this.aiSetThink(function() { }); // Derp Im Braindead
-	}
-});
-
-Crafty.c("AI_Wander", {
-	init : function() {
-		this.requires("AI");
-        this.aiSetThink(this._AI_Wander);
-		this.bind("CollisionSolid", this._handleCollisionSolid);
-	} ,
-	// Behavior when running into a wall.
-	_handleCollisionSolid : function(hit) { 
-		this.trigger("MobStop");
-	} ,
-	_AI_Wander : function() {
-		var bearing = Crafty.math.randomInt(0, 7);
-		if(bearing >= TOT.CONST.BEARING.NONE)  { // Causes the mob to idle.
-			this.trigger("MobStop");
-		} else { // Otherwise make the mob move in a direction.
-			this.trigger("MobIdle");
-			this.trigger("MobMove", { state:true, args:bearing });
-		}
-	}
-});
-
 TOT.ENTS.Assimilate = function(target) {
 	var player = Crafty("Feeler");
 	console.log(player);
@@ -164,12 +136,4 @@ Crafty.c("TestMob", {
 		this.spriteCtrl(Crafty.e("SCIENTIST_SPRITE"));
 	}
 });
-
-
-
-
-
-
-
-
 
