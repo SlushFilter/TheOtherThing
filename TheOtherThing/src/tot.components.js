@@ -1,13 +1,46 @@
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Components
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Put basic components here. Specific entities will go elsewhere.
-// For first implementation, player is a separate component. Should all "living"
-// entities be derived from the same basic "mob" component?
+/**#############################################################################
+ Components
+################################################################################
 
-// #############################################################################
-// GRAPHICS MODIFICATION COMPONENTS
-// #############################################################################
+/** Graphics Modification Components
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+// GfxBackground 	 - Render a sprite on the background.
+// GfxOverlay	 	 - Render a sprite on top of everything.
+// GfxPlayfield	 	 - Render a sprite following Y overlapping rules.
+
+/** Game Mechanics Properties
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+// HitBox			 - Hitbox for scanning operations. 
+// Solid			 - Modifier to make it act as a solid.
+// Velocity			 - Vector that applies movement per frame.
+// Bearing			 - Direction that the entity is facing.
+// CollidesWithSolid - Its what it sounds like.
+// ClassInfo		 - Describes an entity's job and gender eg: Male, Scientist
+// Actionable		 - Something that can be acted upon.
+
+/** Controllers 
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+// SpriteCtrl		 - Notifies an attached sprite to update.
+// Mobile			 - Interperates 'MobMove' commands
+// KeyboardControl	 - Generates local entity events from keystrokes.
+// AI				 - Generic AI update framework.
+
+/** Map Components
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+// ExitBlock		 - ** BROKEN **
+// FloorTile		 - 
+// OverlayTile		 -
+// Block		 	 - Invisible 
+
+/** AI Components
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+// AI_BrainDead
+// AI_Wander
+// AI_Patrol
+
+/**#############################################################################
+ GRAPHICS MODIFICATION COMPONENTS
+##############################################################################*/
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // GfxBackground
@@ -44,9 +77,9 @@ Crafty.c("GfxPlayfield", {
 	}
 });
 
-// #############################################################################
-// GAME MECHANIC PROPERTIES
-// #############################################################################
+/**#############################################################################
+ GAME MECHANIC PROPERTIES
+##############################################################################*/
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // HitBox
@@ -164,9 +197,23 @@ Crafty.c("ClassInfo", {
 	}
 });
 
-// #############################################################################
-// CONTROLLERS
-// #############################################################################
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Actionable
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Actionable entities have an actualize function. The argument passed is the
+// entity that activated it.
+Crafty.c("Actionable", {
+	// For things which are actionable.
+	// Override this function in the entity code.
+	actualize: function(actor) {
+		console.log("Actualize : [" + actor.getId() + "]-act->[" + this.getId() + "]");
+	}
+});
+
+
+/**#############################################################################
+ CONTROLLERS
+##############################################################################*/
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // SpriteCtrl
@@ -343,7 +390,7 @@ Crafty.c("KeyboardControl", {
 });
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// NonPlayerCharacterAI
+// AI
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Component to cause entities to call a swappable think function on regular 
 // intervals.
@@ -392,22 +439,9 @@ Crafty.c("AI", {
     }
 });
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Actionable
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Actionable entities have an actualize function. The argument passed is the
-// entity that activated it.
-Crafty.c("Actionable", {
-	// For things which are actionable.
-	// Override this function in the entity code.
-	actualize: function(actor) {
-		console.log("Actualize : [" + actor.getId() + "]-act->[" + this.getId() + "]");
-	}
-});
-
-// #############################################################################
-// MAP COMPONENTS
-// #############################################################################
+/**#############################################################################
+ MAP COMPONENTS
+##############################################################################*/
 
 Crafty.c("ExitBlock", {
 	init: function() {
@@ -455,9 +489,9 @@ Crafty.c("Block", {
 	// Define hitbox on entity creation.
 });
 
-// #############################################################################
-// AI COMPONENTS
-// #############################################################################
+/**#############################################################################
+ AI COMPONENTS
+##############################################################################*/
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // AI_Braindead
@@ -557,7 +591,3 @@ Crafty.c("AI_Patrol", {
 		this._patrolWaypoints.push(waypoint);
 	}
 });
-
-// #############################################################################
-// DEPRECATE EVERYTHING BELOW THIS LINE :O
-// #############################################################################
