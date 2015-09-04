@@ -6,11 +6,11 @@ TOT.SpawnPlayer = function(x, y) {
 // Player Entity overhaul
 Crafty.c("Player", {
     init : function() {
-        this.requires("NonPlayerCharacter, KeyboardControl, SCIENTIST_SPRITE");
-        //this.addComponent("WiredHitBox");
-        //this.w = 24;
-        //this.h = 24;
-		//this.attach(Crafty.e("JONES_SPRITE").location(-4, -6, 0));
+		this.requires("GfxPlayfield, HitBox, Solid, Velocity, Bearing," +
+			"CollidesWithSolid, KeyboardControl, Mobile, SpriteCtrl");
+		this.setHitBox(24, 24);
+		if(TOT.CONST.DEBUG === true) { this.addComponent("SolidHitBox"); } // DEBUG
+		this.spriteCtrl(Crafty.e("SCIENTIST_SPRITE"));
 		this.bind("Act", this._handleAct);
     } ,
 	_handleAct : function(data) {
@@ -21,13 +21,13 @@ Crafty.c("Player", {
 		var x = this.x + hw;
 		var y = this.y + hh;
 		// The new probe code! :)
-		if(this._bearing === TOT.CONST.BEARING.UP) {
+		if(this.bearing === TOT.CONST.BEARING.UP) {
 			y -= this._h;
-		} else if (this._bearing == TOT.CONST.BEARING.DOWN) {
+		} else if (this.bearing == TOT.CONST.BEARING.DOWN) {
 			y += this._h;
-		} else if(this._bearing === TOT.CONST.BEARING.LEFT) {
+		} else if(this.bearing === TOT.CONST.BEARING.LEFT) {
 			x -= this._w;
-		} else if (this._bearing == TOT.CONST.BEARING.RIGHT) {
+		} else if (this.bearing == TOT.CONST.BEARING.RIGHT) {
 			x += this._w;
 		}
 		

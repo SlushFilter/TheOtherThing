@@ -1,36 +1,9 @@
+// TODO: Deprecate me
 TOT.ENTS.CreateHud = function() {
 	var hud = Crafty.e("HUD");
 	var hudText = Crafty.e("2D, Canvas, Text").attr({ x: 8, y: 8, z:512 }).text("SUSPICION").textColor('white');
 	hud.attach(hudText);
 }
-
-Crafty.c("AI_BrainDead", {
-	init : function() {
-		this.requires("AI");
-		this.aiSetThink(function() { }); // Derp Im Braindead
-	}
-});
-
-Crafty.c("AI_Wander", {
-	init : function() {
-		this.requires("AI");
-        this.aiSetThink(this._AI_Wander);
-		this.bind("CollisionSolid", this._handleCollisionSolid);
-	} ,
-	// Behavior when running into a wall.
-	_handleCollisionSolid : function(hit) { 
-		this.trigger("MobStop");
-	} ,
-	_AI_Wander : function() {
-		var bearing = Crafty.math.randomInt(0, 7);
-		if(bearing >= TOT.CONST.BEARING.NONE)  { // Causes the mob to idle.
-			this.trigger("MobStop");
-		} else { // Otherwise make the mob move in a direction.
-			this.trigger("MobIdle");
-			this.trigger("MobMove", { state:true, args:bearing });
-		}
-	}
-});
 
 TOT.ENTS.Assimilate = function(target) {
 	var player = Crafty("Feeler");
@@ -57,7 +30,7 @@ TOT.SpawnCorpse = function(spriteSheet, x, y) {
 
 Crafty.c("NonPlayerCharacter", {
 	init : function() {
-		this.requires("Thing, Mobile, Solid, Bearing, CollidesWithSolid, WiredHitBox");
+		this.requires("Thing, Mobile, Bearing, CollidesWithSolid, WiredHitBox");
 	}
 });
 
@@ -147,4 +120,20 @@ Crafty.c("Scientist",
 		this.destroy();
 		
 	}
+}); 
+
+
+
+// #############################################################################
+// TEST MOB                                                                     
+// #############################################################################
+Crafty.c("TestMob", {
+	init: function() {
+		this.requires("GfxPlayfield, HitBox, Solid, Velocity, Bearing," +
+			"CollidesWithSolid, AI_Wander, Mobile, SpriteCtrl");
+		this.setHitBox(24, 24);
+		//if(TOT.CONST.DEBUG === true) { this.addComponent("SolidHitBox"); } // DEBUG
+		this.spriteCtrl(Crafty.e("SCIENTIST_SPRITE"));
+	}
 });
+

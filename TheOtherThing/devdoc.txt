@@ -124,13 +124,7 @@ Combat :
 		Melee
 		Firearms
 
-
-
-
-
-
-
-Events : 
+		Events : 
 
 
 
@@ -188,3 +182,16 @@ ToggleControl  - Global event to disable/enable the controllable component
 SelectionUp - Used for selecting the previous menu option
 SelectionDown  - Used for selecting the next menu option.
 SelectionExecute - Used for executing the selected menu option.
+
+
+Refactor of Entity Events ---
+
+"EntCtrl" event : sends a control message to an entity.
+ENT_CMD constants are listed in TOT.CONST.END_CMD
+
+args { cmd:number, arg[]:ARGUMENT }
+
+COMMAND		ARGUMENT
+Move		[ Direction, *Speed ]
+Idle		[ Direction ]
+Die			[]

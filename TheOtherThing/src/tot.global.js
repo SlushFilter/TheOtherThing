@@ -1,0 +1,3 @@
+TOT.GLOBALS = {
+	GameState : TOT.CONST.GAME_STATE.RUNNING ,	
+};

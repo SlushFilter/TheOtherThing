@@ -1,24 +1,4 @@
 // Level map placeholder.
-
-Crafty.c("Tile", {
-	init: function() {
-		this.addComponent("Thing"); 
-	},
-	setTile : function(tileIndex) {
-		var x = tileIndex % 20; // 640 / 32
-		var y = (tileIndex / 20) | 0; // 640 / 32
-		this.sprite(x, y, 0);
-		return this;
-	}
-});
-
-Crafty.c("Block", {
-	init: function() {
-		this.addComponent("Solid, Collision");
-	}
-	// Define hitbox on entity creation.
-});
-
 TOT.MAP.MAPOBJECTS = [
 	null, 
 	function(x, y) { TOT.MAP.Mapper.placeBlock(x, y); }, // 01 - Place a block
@@ -30,7 +10,7 @@ TOT.MAP.MAPOBJECTS = [
 		TOT.MAP.Mapper.placeThing(x, y, exit_block);
 	},
 	function(x, y) { // 04 - New and improved science!
-		TOT.MAP.Mapper.placeThing(x, y, Crafty.e("NewScientist"));
+		TOT.MAP.Mapper.placeThing(x, y, Crafty.e("TestMob"));
 	}
 	
 ];
@@ -50,7 +30,6 @@ TOT.MAP.Mapper = {
 	place : function (x, y, entity) {
 		entity.x = x * this._tWidth;
 		entity.y = y * this._tHeight;
-		entity.z = -16;
 	},
 	
 	// Placea a 'wall' tile with z = the entity's y coordinate 
@@ -58,10 +37,10 @@ TOT.MAP.Mapper = {
 	placeWall : function(x, y, entity) {
 		entity.x = x * this._tWidth;
 		entity.y = y * this._tHeight;
-		entity.z = y + 32; // Temporary change for 2xtile-height walls
 	},
 	placeThing : function(x, y, entity) {
-		entity.location(x * this._tWidth, y * this._tHeight, 0);
+		entity.x = x * this._tWidth;
+		entity.y = y * this._tHeight;
 	},
 	// Places a blocking tile on the map.
 	placeBlock : function(x, y) {
@@ -87,11 +66,11 @@ TOT.MAP.Mapper = {
 				floor = data.floor[y][x];
 				if(floor !== 0) {
 					// Pick the appropriate tile
-					this.place(x, y, Crafty.e("Tile, tileset").setTile(floor));
+					this.place(x, y, Crafty.e("FloorTile, tileset").setTile(floor));
 				}
 				wall = data.wall[y][x];
 				if(wall !== 0) {
-					this.placeWall(x, y, Crafty.e("Tile, tileset").setTile(wall));
+					this.placeWall(x, y, Crafty.e("OverlayTile, tileset").setTile(wall));
 				}
 				attr = data.attr[y][x];
 				if(attr > 0) {

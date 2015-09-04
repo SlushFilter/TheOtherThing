@@ -75,7 +75,7 @@ Crafty.c("TEMP_HUMAN_SPRITE", {
 
 Crafty.c("SCIENTIST_SPRITE", {
 	init : function() {
-		this.requires("Thing, scientist_default, NPCAnimationController");
+		this.requires("scientist_default, GfxPlayfield, NpcAnimationController");
 		// Animation Defs
 		this.reel("IDLE_UP", 1000, [[8, 0]]);
 		this.reel("IDLE_DOWN", 1000, [[0, 0]]);
@@ -86,65 +86,49 @@ Crafty.c("SCIENTIST_SPRITE", {
 		this.reel("WALK_LEFT", 1000, [[4,0], [5, 0], [6, 0], [7, 0]]);
 		this.reel("WALK_RIGHT", 1000, [[4,0], [5, 0], [6, 0], [7, 0]]);
 		this.reel("DIE", 1000, [[4,0], [5, 0], [6, 0], [7, 0]]);
+		// Sprite offset
+		this.x = 0;
+		this.y = -22;
+		this.animate("IDLE_DOWN", -1);
 	}
 });
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// NPC Animation Controller
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Rigged to change animations based on the entity's state using the magic of events.
-// This should be inherited from something that works with SpriteAnimation
+// #############################################################################
+// CONTROLLERS
+// #############################################################################
 
-// This works ... trust me.
-Crafty.c("NPCAnimationController", {
-	_animationControllerEnabled : true,
-	init : function() {
-		this.requires("NonPlayerCharacter, SpriteAnimation");
-		this._animationControllerAction = "IDLE";
-		this._animationControllerBearing = TOT.CONST.BEARING.DOWN;
-		this.bind("Turn", this._animationControllerTurn);
-		this.bind("MobMove", this._animationControllerMobMove);
-		this.bind("MobStop", this._animationControllerMobStop);
-		this.bind("Die", this._animationControllerDie);
+Crafty.c("NpcAnimationController", {
+	init: function() { 
+		this.requires("Canvas, SpriteAnimation");
+	},
+	spriteUpdate: function(self) {
+		// Animation affixes.
+		var prefix = "";
+		var suffix = "";
+
+		// TODO: Are we dead? :)
 		
-	} ,
-	toggleAnimationController : function() {
-		this._animationControllerEnabled = !this._animationControllerEnabled;
-	} ,
-	_animationControllerUpdate : function() {
-		if(this._animationControllerEnabled === false) { return; }
-		if(this._bearing < TOT.CONST.BEARING.NONE) {
-			var reelName = this._animationControllerAction + "_" + 
-				TOT.CONST.BEARING_NAMES[this._bearing];
-				if(this._bearing === TOT.CONST.BEARING.LEFT) {
-					this.flip("X");
-				} else {
-					this.unflip("X");
-				}
-			this.animate( reelName, -1 );
-		} else {
-			this.animate( this._animationControllerAction, -1 );
+		suffix = TOT.CONST.BEARING_NAMES[self.bearing];
+		this._setFlipping(self.bearing);
+		
+		// Are we moving?
+		if(self.vel.x !== 0 || self.vel.y !== 0) {
+			prefix = "WALK_";
+		} else { 
+			prefix = "IDLE_";
+		}
+		
+		var reelName = prefix + suffix;
+		if(this.isPlaying(reelName) === false) {
+			this.animate(reelName, -1);
 		}
 	},
-	_animationControllerTurn : function(bearing) {
-        this._bearing = bearing;
-		this._animationControllerUpdate();
-	},
-	_animationControllerMobMove : function(moveInfo) {
-		if(this.vel.x === 0 && this.vel.y === 0) {
-			this._animationControllerAction = "IDLE";
+	
+	_setFlipping: function(bearing) {
+		if(bearing === TOT.CONST.BEARING.LEFT) {
+			this.flip("X");
 		} else {
-			this._animationControllerAction = "WALK";
+			this.unflip("X");
 		}
-		this._animationControllerUpdate();
-	},
-    _animationControllerMobStop : function() {
-		this._animationControllerAction = "IDLE";
-		this._animationControllerUpdate();
-    },
-	_animationControllerDie : function(dieInfo) {
-		this._animationControllerAction = "DIE";
-		this._animationConrollerBearing = TOT.CONST.BEARING.NONE;
-		this._animationControllerUpdate();
 	}
 });

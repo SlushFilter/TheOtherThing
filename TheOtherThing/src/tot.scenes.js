@@ -9,9 +9,9 @@ Crafty.defineScene("MainMenu", function() {
 Crafty.defineScene("W1M1", function() {
 	// Scene contents
 	TOT.MAP.Mapper.loadMap(TOT.DATA.MAP.W1M1);
-	jonesy = Crafty.e("Player").location(200,256,32000);
+	jonesy = Crafty.e("Player").attr({ x: 256, y: 256 }); 
 	Crafty.viewport.follow(jonesy, 0, 0);
-	TOT.ENTS.CreateHud();
+	//TOT.ENTS.CreateHud();
 });
 
 Crafty.defineScene("W1M2", function() {
