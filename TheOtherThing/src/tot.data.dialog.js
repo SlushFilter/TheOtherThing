@@ -28,47 +28,31 @@ function DialogNode(node_index, challenge_text, selections){
 };
 
 // Selection constructor
-function SelectionProto(){
-};
-SelectionProto.prototype.action_execute = function(menu_object) {
-	// Normal behavior is to move to the next dialog node or exit dialog.
-	// TODO: Insert code to increase/decrease suspicion level.
-	if(Math.abs(this.result) < 2){
-		menu_object.nextDialog(this.next_dialog);
-	} else {
-		// A value of +/-2 means the conversation is over.
-		if(this.result > 0){
-			// Exit dialog.
-			menu_object.destroy();
-		} else {
-			// Assimilate.
-			console.log("ASSIMILATE HIM!");
-			TOT.ENTS.Assimilate(menu_object.talker);
-			menu_object.talker.think = TOT.ENTS.AI_BrainDead;
-			menu_object.assimilating = true;
-			menu_object.destroy();
-		};
-	};
-};
-
-/* Selection constructor:
-new_action must either be null or an object in the form:
-	{
-		action_execute:
-			{
-				value:
-					function(parameters) {
-						**new action code goes here**
-					}
-			}
-	}
-*/
-function Selection(selection_text, next_dialog, result, new_action){
-	new_action = new_action || {}
-	temp_object = Object.create(SelectionProto.prototype, new_action);
+function Selection(selection_text, next_dialog, result, action_execute){
+	temp_object = new Object();
 	temp_object.selection_text = selection_text;
 	temp_object.next_dialog = next_dialog;
 	temp_object.result = result;
+	temp_object.action_execute = action_execute || function(menu_object) {
+		// Normal behavior is to move to the next dialog node or exit dialog.
+		// TODO: Insert code to increase/decrease suspicion level.
+		if(Math.abs(this.result) < 2){
+			menu_object.nextDialog(this.next_dialog);
+		} else {
+			// A value of +/-2 means the conversation is over.
+			if(this.result > 0){
+				// Exit dialog.
+				menu_object.destroy();
+			} else {
+				// Assimilate.
+				console.log("ASSIMILATE HIM!");
+				TOT.ENTS.Assimilate(menu_object.talker);
+				menu_object.talker.think = TOT.ENTS.AI_BrainDead;
+				menu_object.assimilating = true;
+				menu_object.destroy();
+			};
+		};
+	};
 	
 	return temp_object;
 };
@@ -81,13 +65,9 @@ TOT.DATA.DIALOG = {
 			challenge_text = "The Other Thing",
 			selections = [
 				new Selection(selection_text = "Start Game", next_dialog = 0, result = 0, 
-					new_action = { action_execute: 
-					{
-						value: function(menu_object){
-							Crafty.audio.play("game_start_sound");
-							Crafty.enterScene("W1M1"); // Need garbage collection?
-						}
-					}
+					new_action = function(menu_object){
+						Crafty.audio.play("game_start_sound");
+						Crafty.enterScene("W1M1"); // Need garbage collection?
 				}),
 				new Selection(selection_text = "Instructions", next_dialog = 0, result = 0)
 			]
