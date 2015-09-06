@@ -1,7 +1,5 @@
 // Menus
 
-
-
 Crafty.c("Selectionable", {
 	// TODO: Refactor the shit out of this.
 	SELECTION_UP: Crafty.keys.UP_ARROW,
@@ -101,6 +99,7 @@ Crafty.c("Selectionable", {
 
 Crafty.c("Menu", {
 	// TODO: Make these bastard scientists stop moving while we're talking to them!
+	// ^^^ Should this be in the entity code or menu? I think entity code.s
 	text_width: 300,
 	cursor : null,
 	dialog_tree: [],
@@ -108,7 +107,7 @@ Crafty.c("Menu", {
 	talker: null, // Reference to the entity who is talking.
 	assimilating: false, // So we can properly re-enable movement controls when not assimilating.
 	
-	default_layouts: [ // TODO: Prototype for layout object.
+	default_layouts: [ // TODO: Move to data file?
 		{
 			// Layout 0: Dialog window centered and takes up 75% of the screen. Main text centered in top 1/3 of window. Selection text centered in bottom 2/3.
 			x: null,
@@ -206,7 +205,7 @@ Crafty.c("Menu", {
 	
 	setLayout: function(layout_index) {
 		// Set current layout
-		
+		// TODO: Simplify this.
 		this.current_layout = this.default_layouts[layout_index];
 		temp_viewport_object = new Object();
 		temp_viewport_object._x = Crafty.viewport.rect_object._x;
@@ -230,15 +229,20 @@ Crafty.c("Menu", {
 		this.menu = Crafty.e("MenuBackground").setAttr(this.current_layout).color("blue");
 		this.attach(this.menu);
 		
-		// this.menu = Crafty.e("MenuBackground").color("blue");
+		// Create cursor entity.
+		// TODO: Move to selectionable component.
 		this.cursor = Crafty.e("MenuSelector");
 		this.attach(this.cursor);
 		
-		this.primaryTextY = this.menu.y + (this.menu.h * 0.25); // For testing, will move.
 		
+		// TODO: This should be dynamic, not static.
+		this.primaryTextY = this.menu.y + (this.menu.h * 0.25); 
+		
+		// Commence the convo.
 		this.nextDialog(0);
 	},
 	
+	// Used for actionables. We need to identify the NPC with whom the player is conversing.
 	setTalker: function(who_dat) {
 		this.talker = who_dat;
 		return this;
@@ -278,23 +282,6 @@ Crafty.c("MenuBackground", {
 	
 	init: function() {
 		this.requires("2D, DOM, Color");
-		// One size fits all.
-		// var menuWidth = 0.75; // Horizontal percentage of the screen to fill.
-		// var menuHeight = 0.5; // Vertical percentage of the screen to fill.
-		
-		// Figure out the dimensions of the menu rectangle.
-		// var vw = Crafty.viewport._width;
-		// var vh = Crafty.viewport._height;
-		// this.w = vw * menuWidth;
-		// this.h = vh * menuHeight;
-		
-		// Calculate offsets for center (for now)
-		// this._ofsX = (vw - this.w) / 2; 
-		// this._ofsY = (vh - this.h) / 2;
-		
- 		// Negative offsets, because we want to undo any viewport panning.
-		// this.x = (-Crafty.viewport.x) + this._ofsX;
-		// this.y = (-Crafty.viewport.y) + this._ofsY;
 	},
 	
 	setAttr: function(layout_object) {
@@ -307,6 +294,8 @@ Crafty.c("MenuBackground", {
 	}
 });
 
+// Create and position the cursor.
+// TODO: Need to set position upon instantiation.
 Crafty.c("MenuSelector", {
 	init : function() {
 		this.requires("2D, DOM, Color");
