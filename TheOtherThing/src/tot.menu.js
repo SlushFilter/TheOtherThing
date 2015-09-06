@@ -15,9 +15,19 @@ Crafty.c("Selectionable", {
 	
 	
 	init: function(){
-		this.requires("Thing, Menu");
+		this.requires("Menu, KeyboardControl");
 		
-		this.bind("SelectionUp", function(){
+		this.bind("SelectionUp", this.selectUp);
+		this.bind("SelectionDown", this.selectDown);
+		this.bind("SelectionExecute", function(keyPressed){
+			if(keyPressed.state){
+				this.selection_objects_array[this.selection_current].action_execute(this);
+			};
+		});
+	},
+	
+	selectUp: function(keyPressed){
+		if(keyPressed.state){
 			if(this.selection_current > 0){
 				this.selection_current--;
 			} else {
@@ -25,8 +35,10 @@ Crafty.c("Selectionable", {
 			};
 			Crafty.audio.play("select_sound");
 			this.redrawSelectionText();
-		});
-		this.bind("SelectionDown", function(){
+		};
+	},
+	selectDown: function(keyPressed){
+		if(keyPressed.state){
 			if(this.selection_current < this.selection_max){
 				this.selection_current++;
 			} else {
@@ -34,59 +46,7 @@ Crafty.c("Selectionable", {
 			};
 			Crafty.audio.play("select_sound");
 			this.redrawSelectionText();
-		});
-		this.bind("SelectionExecute", function(){
-			this.selection_objects_array[this.selection_current].actionExecute(this);
-		});
-		
-		// this.bind("KeyDown", function(keypress){
-			// if (keypress.key === this.SELECTION_UP){
-				// Move the selection indicator up.
-				// if(this.selection_current > 0){
-					// this.selection_current--;
-				// } else {
-					// this.selection_current = this.selection_max;
-				// };
-				// Crafty.audio.play("select_sound");
-				// this.redrawSelectionText();
-			// }
-			// if (keypress.key === this.SELECTION_DOWN){
-				// Move the selection indicator down.
-				// if(this.selection_current < this.selection_max){
-					// this.selection_current++;
-				// } else {
-					// this.selection_current = 0;
-				// };
-				// Crafty.audio.play("select_sound");
-				// this.redrawSelectionText();
-			// }
-			// if (keypress.key === this.SELECTION_EXECUTE){
-				// Crafty.audio.play("selection_execute_sound");
-				// Check for dialog exit.
-				// Load next dialog.
-				// if(this.selection_objects_array[this.selection_current].RESULT === 2){
-					// Exit the conversation.
-					// this.destroy();
-				// } else if (this.selection_objects_array[this.selection_current].RESULT === 1){
-					// Increase suspicion level.
-					// this.nextDialog(this.selection_objects_array[this.selection_current].NEXT_DIALOG);
-				// } else if (this.selection_objects_array[this.selection_current].RESULT === 0){
-					// A 0 result means you move to the NEXT_DIALOG node.
-					// this.nextDialog(this.selection_objects_array[this.selection_current].NEXT_DIALOG);
-				// } else if (this.selection_objects_array[this.selection_current].RESULT === -1) {
-					// Decrease suspicion level.
-					// this.nextDialog(this.selection_objects_array[this.selection_current].NEXT_DIALOG);
-				// } else if (this.selection_objects_array[this.selection_current].RESULT === -2) {
-					// He fell for it! ASSIMILATE!
-					// console.log("ASSIMILATE HIM!");
-					// TOT.ENTS.Assimilate(this.talker);
-					// this.talker.think = TOT.ENTS.AI_BrainDead;
-					// this.assimilating = true;
-					// this.destroy();
-				// };
-				// this.selection_objects_array[this.selection_current].actionExecute(this);
-			// }
-		// });
+		};
 	},
 	
 	// Load the selectionables.
@@ -201,16 +161,46 @@ Crafty.c("Menu", {
 				this.y = viewport_object._y + this.ofsY;
 			}
 		},
+		{
+			// Layout 3: Dialog window takes up entire screen.
+			x: null,
+			y: null,
+			width: null,
+			height: null,
+			setLayout: function(viewport_object){
+				this.height = viewport_object._h;
+				this.width = viewport_object._w;
+				this.x = viewport_object._x;
+				this.y = viewport_object._y;
+			}
+		},
+		{
+			// Layout 4: Dialog window height and width each 1/4 of screen. Window positioned in center of bottom half of screen.
+			x: null,
+			y: null,
+			width: null,
+			height: null,
+			ofsX: null,
+			ofsY: null,
+			setLayout: function(viewport_object){
+				this.height = viewport_object._h / 4;
+				this.width = viewport_object._w / 4;
+				this.ofsX = (viewport_object._w - this.width) / 2;
+				this.ofsY = (viewport_object._h / 2) + (this.height / 2);
+				this.x = viewport_object._x + this.ofsX;
+				this.y = viewport_object._y + this.ofsY;
+			}
+		},
+		{
+			// Layout 5: Do we need a blank layout or an invisible menu background?
+		}
 	],
 	current_layout: null,
 	
 	init: function(){
 		console.log("Creating menu.");
-		this.requires("Thing, Selectionable");
+		this.requires("2D, DOM, Selectionable");
 		Crafty.audio.play("selection_execute_sound");
-		
-		// Generate layout.
-		this.setLayout(1);
 		
 	} ,
 	
@@ -218,7 +208,13 @@ Crafty.c("Menu", {
 		// Set current layout
 		
 		this.current_layout = this.default_layouts[layout_index];
-		this.current_layout.setLayout(Crafty.viewport.rect_object);
+		temp_viewport_object = new Object();
+		temp_viewport_object._x = Crafty.viewport.rect_object._x;
+		temp_viewport_object._y = Crafty.viewport.rect_object._y;
+		temp_viewport_object._h = Crafty.viewport.height;
+		temp_viewport_object._w = Crafty.viewport.width;
+		this.current_layout.setLayout(temp_viewport_object);
+		return this;
 	},
 	
 	loadDialog: function(dialogArray) {
@@ -318,76 +314,4 @@ Crafty.c("MenuSelector", {
 		this.w = 8;
 		this.h = 8;
 	},
-});
-
-// TODO: Merge this with Menu component.
-Crafty.c("TopMenu", {
-	menu: null,
-	in_help_screen: false,
-	help_screen: null,
-	help_text: null,
-	
-	toggleHelp: function(){
-		this.in_help_screen = !this.in_help_screen;
-	},
-	
-	init: function(){
-		this.requires("MenuBackground, KeyboardControl"); // Not really used, but implementation may change.
-		this.menu = Crafty.e("MenuBackground").color("black");
-		this.title_sprite = Crafty.e("title_1, 2D, DOM");
-		this.title_sprite.attr( { x: this.menu.x + (this.menu.w / 2) - (this.title_sprite.w / 2), 
-					 y: this.menu.y + 30 } );
-		
-		this.start_game_text = Crafty.e("2D, DOM, Text");
-		// TODO: Center this text.
-		this.start_game_text.attr({ x: this.menu.x + (this.menu.w / 2) - (150), y: this.menu.y + 30 +this.title_sprite.h, w: 300 }).text("Press ENTER key to begin.<br>Press I key for instructions.").textColor("red").textFont({size: "23px"});
-		
-		this.attach(this.start_game_text);
-		this.attach(this.menu);
-		
-		// Keybind.
-		// TODO: Move to separate component. Or merge with Selectionable component.
-		this.bind("Act", function(keypress) {
-			if(!this.in_help_screen){
-				Crafty.audio.play("game_start_sound");
-				this.unbind("Act");
-				this.destroy();
-				Crafty.enterScene("W1M1"); // Should this be before destroy()?
-			};
-		});
-		this.bind("KeyDown", function(keypress) {
-			if(keypress.key === Crafty.keys.I && !this.in_help_screen) {
-				// Hax.
-				// TODO: Make this better.
-				this.help_screen = Crafty.e("2D, DOM, help_screen").attr({x: Crafty.viewport.rect_object._x, y: Crafty.viewport.rect_object._y});
-				this.help_text = Crafty.e("Text, 2D, DOM").text("Press any key to return to menu.").textColor("white");
-				// Yeah, this needs to be dynamically centered as well.
-				this.help_text.attr({ w: 400, x: 150, y: 400 }).textFont({ size: "23px" });
-				this.help_screen.attach(this.help_text);
-				this.toggleHelp();
-			} else if (this.in_help_screen){
-				this.help_screen.destroy();
-				this.toggleHelp();				
-			};
-		});
-	},
-});
-
-// Ending credits. Doesn't actually scroll, yet.
-Crafty.c("CreditRoll", {
-	text_width: 400,
-	init: function() {
-		this.requires("MenuBackground, 2D, DOM");
-		this.menu = Crafty.e("MenuBackground").color("black");
-	},
-	displayText: function(text_to_display) {
-		this.text_width = this.menu.w;
-		this.credit_text = Crafty.e("2D, DOM, Text")
-			.attr( { x: this.menu.x + (this.menu.w / 2) - (this.text_width / 2), 
-					 y: this.menu.y, w: this.text_width} )
-			.text(text_to_display)
-			.textColor('white')
-			.textFont({ size: "20px" });
-		// Add code to center the text.
-	}
 });

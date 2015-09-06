@@ -67,7 +67,7 @@ Crafty.c("NewScientist", {
         this.setBearing(TOT.CONST.BEARING.DOWN);
 		// Temp code for testing dialog. Remove this before commit.
 		this.actualize = function() {
-			Crafty.e("Menu").setTalker(this).loadDialog(TOT.DATA.DIALOG.DIALOG_STANDARD);
+			Crafty.e("Menu").setLayout(1).setTalker(this).loadDialog(TOT.DATA.DIALOG.DIALOG_STANDARD);
 		};
 	} ,
 });
