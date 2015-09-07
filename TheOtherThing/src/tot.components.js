@@ -21,7 +21,7 @@
 /** Controllers 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 // SpriteCtrl		 - Notifies an attached sprite to update.
-// Mobile			 - Interperates 'MobMove' commands
+// Mobile			 - Interperates 'MobMove' 
 // KeyboardControl	 - Generates local entity events from keystrokes.
 // AI				 - Generic AI update framework.
 

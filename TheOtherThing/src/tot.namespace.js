@@ -11,7 +11,7 @@ var TOT = {
 	// Constants . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
     
 	CONST : {
-		DEBUG : false,
+		DEBUG : true,
         BEARING : { 
             UP : 0,
             DOWN : 1,
