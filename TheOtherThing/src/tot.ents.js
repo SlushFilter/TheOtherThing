@@ -38,6 +38,10 @@ Crafty.c("NewScientist", {
 	init : function() {
 		this.requires("NonPlayerCharacter, Actionable, AI_Wander, SCIENTIST_SPRITE");
         this.setBearing(TOT.CONST.BEARING.DOWN);
+		// Temp code for testing dialog. Remove this before commit.
+		this.actualize = function() {
+			Crafty.e("Menu").setLayout(1).setTalker(this).loadDialog(TOT.DATA.DIALOG.DIALOG_STANDARD);
+		};
 	} ,
 });
 

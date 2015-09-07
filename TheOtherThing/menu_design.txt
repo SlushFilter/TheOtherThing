@@ -1,0 +1,26 @@
+Menu design doc.
+
+Menu system requirements:
+	- Must be able to position menus anywhere on screen.
+	- Must be able to place menus of preset sizes as well as custom sizes.
+	- Must be able to auto-center / auto-position menus.
+	- Must be able to dynamically load text and response options.
+	- Must allow for multiple different types of responses (links or buttons or something else).
+	- Must be able to automatically position all text and responses in relation to each other and the menu window.
+	- Must track z-position of multiple menus.
+	- Must allow for animated text display (text slowly typed or faded in or other effects).
+		- Must have options for text display speed or skipping animation.
+	- Must be able to scroll text.
+	- Must be able to determine if text is too large for display.
+		- Split text and display one piece at a time.
+		- Do not show selectionables until all text has been displayed.
+	- Must allow for audio.
+		- Must be able to stop (skip) audio while it is playing.
+	- Must be able to display sprites within and around the menu window.
+		- Must be able to change or animate these sprites.
+		- Must be able to change opacity (alpha) of sprites.
+	- Must have option to exit dialog prematurely.
+
+Dialog system requirements:
+	- Must dynamically load dialog from file.
+	- Must be able to execute methods within loaded dialog objects.

@@ -349,7 +349,7 @@ Crafty.c("KeyboardControl", {
         ];
 	},
 	handleKeyDown : function(keyPress) {
-		//console.log("Key Pressed: " + keypress.key);
+		// console.log("Key Pressed: " + keyPress.key);
 		if(keyPress.key === Crafty.keys.CAPS){
 			Crafty.trigger("ToggleControl");
 		}

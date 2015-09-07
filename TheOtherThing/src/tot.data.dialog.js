@@ -20,19 +20,20 @@ TOT.DATA = TOT.DATA || {};
 
 // TODO: Need to dynamically load dialog array.
 
-// DialogNode prototype
+// DialogNode constructor
 function DialogNode(node_index, challenge_text, selections){
 	this.node_index = node_index;
 	this.challenge_text = challenge_text;
 	this.selections = selections;
 };
 
-// Selection prototype
-function Selection(selection_text, next_dialog, result){
-	this.selection_text = selection_text;
-	this.next_dialog = next_dialog;
-	this.result = result;
-	this.actionExecute = function(menu_object) {
+// Selection constructor
+function Selection(selection_text, next_dialog, result, action_execute){
+	temp_object = new Object();
+	temp_object.selection_text = selection_text;
+	temp_object.next_dialog = next_dialog;
+	temp_object.result = result;
+	temp_object.action_execute = action_execute || function(menu_object) {
 		// Normal behavior is to move to the next dialog node or exit dialog.
 		// TODO: Insert code to increase/decrease suspicion level.
 		if(Math.abs(this.result) < 2){
@@ -41,7 +42,7 @@ function Selection(selection_text, next_dialog, result){
 			// A value of +/-2 means the conversation is over.
 			if(this.result > 0){
 				// Exit dialog.
-				menu_object.destroy;
+				menu_object.destroy();
 			} else {
 				// Assimilate.
 				console.log("ASSIMILATE HIM!");
@@ -52,9 +53,34 @@ function Selection(selection_text, next_dialog, result){
 			};
 		};
 	};
+	
+	return temp_object;
 };
 
 TOT.DATA.DIALOG = {
+
+	DIALOG_TITLE_SCREEN: [
+		new DialogNode(
+			node_index = 0,
+			challenge_text = "The Other Thing",
+			selections = [
+				new Selection(selection_text = "Start Game", next_dialog = 0, result = 0, 
+					new_action = function(menu_object){
+						Crafty.audio.play("game_start_sound");
+						Crafty.enterScene("W1M1"); // Need garbage collection?
+				}),
+				new Selection(selection_text = "Instructions", next_dialog = 0, result = 0)
+			]
+		)
+	],
+	
+	DIALOG_CREDIT_SCREEN: [
+		new DialogNode(
+			node_index = 0,
+			challenge_text = "Thank you for playing our game!<br><br>Unfortunately, we were unable to finish the game due to time constraints. >.< Hopefully you've found yourself at least slightly amused.<br><br>Oh well, better luck next time!<br><br>Credits:<br>Art, good coding: Slush.Filter<br>SFX, bad coding: Anjack",
+			selections = []
+		)
+	],
 	
 	DIALOG_PLACEHOLDER: [
 		 new DialogNode(

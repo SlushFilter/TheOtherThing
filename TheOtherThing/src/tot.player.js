@@ -14,7 +14,8 @@ Crafty.c("Player", {
 		this.bind("Act", this._handleAct);
     } ,
 	_handleAct : function(data) {
-		if(data.state === false) { return; }
+		// if(data.state === false) { return; }
+		if(!data.state) { return; };
 		
 		var hw = this._w / 2;
 		var hh = this._h / 2;

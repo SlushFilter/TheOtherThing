@@ -2,7 +2,8 @@
 
 Crafty.defineScene("MainMenu", function() {
 	console.log("Loading main menu.");
-	Crafty.e("TopMenu");
+	// Crafty.e("TopMenu");
+	Crafty.e("Menu").setLayout(4).loadDialog(TOT.DATA.DIALOG.DIALOG_TITLE_SCREEN);
 });
 
 // TODO: Create a factory that will load the info for each scene from TOT.DATA.MAP
