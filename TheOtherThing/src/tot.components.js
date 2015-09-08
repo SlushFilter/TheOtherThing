@@ -20,23 +20,26 @@
 
 /** Controllers 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-// SpriteCtrl		 - Notifies an attached sprite to update.
-// Mobile			 - Interperates 'MobMove' 
+// Mortal			 - Interperates 'Die' events
+// Actor			 - Interperates 'Act' events
+// Assimilator		 - Interperates 'Assimilate' events.
+// SpriteCtrl		 - Attaches and notifies a sprite to update.
+// Mobile			 - Interperates 'MobMove' events
 // KeyboardControl	 - Generates local entity events from keystrokes.
 // AI				 - Generic AI update framework.
 
 /** Map Components
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 // ExitBlock		 - ** BROKEN **
-// FloorTile		 - 
-// OverlayTile		 -
+// FloorTile		 - It's a floor tile.
+// OverlayTile		 - It's an overlay tile.
 // Block		 	 - Invisible 
 
 /** AI Components
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-// AI_BrainDead
-// AI_Wander
-// AI_Patrol
+// AI_BrainDead		 - A null AI .. of sorts.
+// AI_Wander		 - Causes an entity to wander around.
+// AI_Patrol		 - Causes an entity to patrol waypoints. ** UNTESTED **
 
 /**#############################################################################
  GRAPHICS MODIFICATION COMPONENTS
@@ -214,6 +217,91 @@ Crafty.c("Actionable", {
 /**#############################################################################
  CONTROLLERS
 ##############################################################################*/
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Mortal
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Responds to the "Die" event in a death-like way.
+// 
+Crafty.c("Mortal", {
+	init: function() {
+		this.bind("Die", this._handleDie);
+	},
+	_handleDie: function() {
+		console.log(this.getId() + " died!");
+		this.destroy();
+	}
+});
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Actor
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Responds to the "Act" event by scanning for an Actionable target
+// and then calling its actualize function.
+Crafty.c("Actor", {
+	init: function() {
+		this.bind("Act", this._handleAct); // TODO: Make this an Assimilate action
+	},
+	_handleAct: function(data) {
+		
+		if(!data.state) { 
+			if(TOT.CONST.DEBUG === true) { 
+				//console.log( " --- _handleAct(data) ---");
+				//console.log(data); // Bug watcher.
+			} 
+			return; 
+		};
+		//if(data.state === false) { return; }
+		
+		var hw = this._w / 2;
+		var hh = this._h / 2;
+		var x = this.x + hw;
+		var y = this.y + hh;
+		// The new probe code! :)
+		if(this.bearing === TOT.CONST.BEARING.UP) {
+			y -= this._h;
+		} else if (this.bearing == TOT.CONST.BEARING.DOWN) {
+			y += this._h;
+		} else if(this.bearing === TOT.CONST.BEARING.LEFT) {
+			x -= this._w;
+		} else if (this.bearing == TOT.CONST.BEARING.RIGHT) {
+			x += this._w;
+		}
+		
+		// Fetch a list of all 'Actionable' entities
+		var actors = Crafty("Actionable");
+		var ent = null;
+		console.log(actors.length);
+		for(var i = 0; i < actors.length; i++) {
+			ent = Crafty(actors[i]);
+			// Never ever actualize yourself.
+			if(ent === this) { continue; }
+			// Check to see if we actualized them.
+			if(ent.intersect(x, y, 1, 1) === true) {
+				ent.actualize(); 
+				// Uncomment me to test assimilation with a keystroke.
+				// this.trigger("Assimilate", ent); 
+				return;
+			}
+		}
+	}
+});
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Assimilator
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Responds to the "Act" event with basic assimilation rules.
+Crafty.c("Assimilator", {
+	init: function() {
+		this.bind("Assimilate", this.assimilate); // TODO: Make this an Assimilate action
+	},
+	assimilate : function(target) {
+		// TODO: Make dismount features and other cool stuff.
+		// Copy player-like components onto the target.
+		console.log("Assimilating " + target.getId());
+		target.addComponent("AI_BrainDead, Actor, KeyboardControl, Assimilator");
+		this.trigger("Die"); // kill off the old host.
+	}
+});
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // SpriteCtrl

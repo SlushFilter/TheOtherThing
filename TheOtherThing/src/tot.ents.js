@@ -134,13 +134,15 @@ Crafty.c("Scientist",
 Crafty.c("TestMob", {
 	init: function() {
 		this.requires("GfxPlayfield, HitBox, Solid, Velocity, Bearing," +
-			"CollidesWithSolid, AI_Wander, Mobile, SpriteCtrl, Actionable");
+			"CollidesWithSolid, AI_Wander, Mobile, SpriteCtrl, Actionable," +
+			"Mortal");
 		this.setHitBox(24, 24);
 		//if(TOT.CONST.DEBUG === true) { this.addComponent("SolidHitBox"); } // DEBUG
 		this.spriteCtrl(Crafty.e("SCIENTIST_SPRITE"));
 		this.actualize = this.actScience;
 	},
 	actScience: function() {
+		Crafty.e("Menu").setLayout(1).setTalker(this).loadDialog(TOT.DATA.DIALOG.DIALOG_STANDARD);
 		console.log("I am a scientist. Please do not be a monster!");
 		if(this.think !== TOT.ENTS.AI_BrainDead){ // Temporary hack to stop player talking to itself.
 			Crafty.e("Menu").setTalker(this).loadDialog(TOT.DATA.DIALOG.DIALOG_STANDARD);

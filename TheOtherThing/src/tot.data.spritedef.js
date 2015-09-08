@@ -50,10 +50,15 @@ TOT.DATA.SPRITEDEF = {
 // Animations 
 Crafty.c("JONES_SPRITE", {
 	init : function() {
-		this.requires("Thing, jones_default, SpriteAnimation");
+		this.requires("jones_default, GfxPlayfield, Canvas, SpriteAnimation");
 		// Animation Defs
 		this.reel("idle", 1000, [[0,0], [1,0], [2,0], [3,0]]);
 		this.animate("idle", -1);
+		this.x = -4;
+		this.y = -4;
+	},
+	spriteUpdate: function() {
+		return;
 	}
 });
 
