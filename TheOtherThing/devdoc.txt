@@ -30,7 +30,6 @@ Style :
 
 BASIC ELEMENTS : 
 
-* Attack
 * Assimilation
 * Dialog System
 * EXIT
@@ -42,13 +41,13 @@ Controls
 	- Attack
 	- JUMP!
 Move
+
 Maps
 	32x32 tiles
 	two kinds of 'placement' - 
 		walls - render in front of Entity when entity.y < wall.y
 		floor - always render behind entities
 	
-Health Meter
 Suspicion Meter
 Talk
 
@@ -119,11 +118,7 @@ Combat :
 	
 	NEED ----- 
 		"THING" ability - Occurs on killing an NPC, you become them after they die.
-		Only one form at a time, and no backseeees.
-	WANT -----
-		Melee
-		Firearms
-
+	
 		Events : 
 
 
@@ -150,13 +145,9 @@ Velocity - Updates XY coords every frame, adds a 'vel' component to the entity w
 
 Facing - 
 
-TakesDamage - Defines something that can take damage, and potentially die. To deal damage to something, 
-	you must pass a damageInfo object with the format of: { source:entity, damage:number }
-	Fires a Die event when health drops below zero. The die event shoudl forward on the damageInfo object.
-
 Events
 
-CollisionSolid - Thrown when the entity collides with something solid.
+CollidesWithSolid - Thrown when the entity collides with something solid.
 
 MobMove - Move command for a mob, passes the following argument object:
 		data {
@@ -184,14 +175,77 @@ SelectionDown  - Used for selecting the next menu option.
 SelectionExecute - Used for executing the selected menu option.
 
 
-Refactor of Entity Events ---
+--- My tasks right now 
 
-"EntCtrl" event : sends a control message to an entity.
-ENT_CMD constants are listed in TOT.CONST.END_CMD
+- Features
+	- Map Loader : load a tilemap from a PNG 
+	- Sound loadlists ( sfx, volume )
+	- Progress callbacks for loading screen (check crafty docs)
+	- Exit Block
+	- A door.
+	- Assimilate function : Base functionality. Need to get Jones on the target's head.
 
-args { cmd:number, arg[]:ARGUMENT }
+- Tools
+	- Map Scripting tool : takes a tiled map and allows us to place ents and generate scripts based off that.
+		scripts will be raw javascript code.
+	# Tiled -> PNG tool
 
-COMMAND		ARGUMENT
-Move		[ Direction, *Speed ]
-Idle		[ Direction ]
-Die			[]
+- Content
+	- Bordersprites
+	- Character Sprite
+
+	- Lab 112
+	- Hallway outside of 112
+	- Doors
+	- Scientist Male
+	- Scientist Female
+	- Scientist ???
+	- Maintenance Pliskin MAN
+	- Security Male
+	- Security Female
+	- Ham sandwitch
+	- Turkey sandwitch
+	- Club sandwitch
+	- Sub sandwitch
+	- Asian Fusion sandwitch
+	- Science: Can YOU do it ?
+	- Science-Tits  WEEKLY (scientists love this one)
+	- Bigg Buts! (Magazine about HUGE EXCEPTIONS! )
+	- Cats
+	- Rats
+	
+- Ideas
+	- Opening scenario:
+	  Two scientists are talking about a meteor that a jarhead pulled into the
+	  base. One of them jests about how he was taken away for 'special testing'
+	  after being exposed to the biological contaminate that they found.
+	  One of the scientists is a smoker, and the other scientist takes his/her
+	  last cigarette. Angry at the other scientist, they leave the specimen
+	  chamber and go stand on opposite sides of the lab. 
+	  
+	  Puzzle 1:
+	  
+		- attempt to leave the lab and be caught by the base's scanners. one of
+		  the scientists will incinerate you in the airlock.
+		  
+	    - become the smoking scientist, and leave for lowest suspicion. Alarm goes
+		  off in the lab airlock going off about biological contaminates, but the
+		  other scientist believes its lingering smoke messing with the system ...
+		  (lecture, lecture) .. mild suspicion raised.
+		  
+	    - become the non-smoking scientist (no excuse to leave) and raise some
+		  suspicion. Alarm goes off in the airlock, but the other scientist wont
+		  incinerate you.
+		  
+	- A DEFCON system that can kill a whole floor (game over scenario) : 
+	  DEFCON would be raised when people are getting nervous.
+	  DEFCON could be lowered manually or by calming everyone down.
+	  This would move the Suspicion mechanic over to 'how likely will this person
+		actively seek to raise DEFCON'
+		
+	- Convincing the base's AI to let you go free (win condition)
+	  Player would go and talk to DEEP_THOUGHT (computer's name) and convince it
+	  to let the player leave the base.
+	  
+For Anjack -
+Need a way of adding logic to the dialog menus to enable and disable selections.
