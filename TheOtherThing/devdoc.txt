@@ -195,3 +195,79 @@ COMMAND		ARGUMENT
 Move		[ Direction, *Speed ]
 Idle		[ Direction ]
 Die			[]
+
+
+
+- Features
+	- Map Loader : load a tilemap from a PNG 
+	- Sound loadlists ( sfx, volume )
+	- Progress callbacks for loading screen (check crafty docs)
+	- 
+	- Exit Block
+	- A door.
+	- Assimilate function : Base functionality. Need to get Jones on the target's head.
+
+- Tools 
+	- Map Scripting tool : takes a tiled map and allows us to place ents and generate scripts based off that.
+		scripts will be raw javascript code.
+	# Tiled -> PNG tool
+
+- Content
+	- Bordersprites
+	- Character Sprite
+
+	- Lab 112
+	- Hallway outside of 112
+	- Doors
+	- Scientist Male
+	- Scientist Female
+	- Scientist ???
+	- Maintenance Pliskin MAN
+	- Security Male
+	- Security Female
+	- Ham sandwitch
+	- Turkey sandwitch
+	- Club sandwitch
+	- Sub sandwitch
+	- Asian Fusion sandwitch
+	- Science: Can YOU do it ?
+	- Science-Tits  WEEKLY (scientists love this one)
+	- Bigg Buts! (Magazine about HUGE EXCEPTIONS! )
+	- Cats
+	- Rats
+	
+- Ideas
+	- Opening scenario:
+	  Two scientists are talking about a meteor that a jarhead pulled into the
+	  base. One of them jests about how he was taken away for 'special testing'
+	  after being exposed to the biological contaminate that they found.
+	  One of the scientists is a smoker, and the other scientist takes his/her
+	  last cigarette. Angry at the other scientist, they leave the specimen
+	  chamber and go stand on opposite sides of the lab. 
+	  
+	  Puzzle 1:
+	  
+		- attempt to leave the lab and be caught by the base's scanners. one of
+		  the scientists will incinerate you in the airlock.
+		  
+	    - become the smoking scientist, and leave for lowest suspicion. Alarm goes
+		  off in the lab airlock going off about biological contaminates, but the
+		  other scientist believes its lingering smoke messing with the system ...
+		  (lecture, lecture) .. mild suspicion raised.
+		  
+	    - become the non-smoking scientist (no excuse to leave) and raise some
+		  suspicion. Alarm goes off in the airlock, but the other scientist wont
+		  incinerate you.
+		  
+	- A DEFCON system that can kill a whole floor (game over scenario) : 
+	  DEFCON would be raised when people are getting nervous.
+	  DEFCON could be lowered manually or by calming everyone down.
+	  This would move the Suspicion mechanic over to 'how likely will this person
+		actively seek to raise DEFCON'
+		
+	- Convincing the base's AI to let you go free (win condition)
+	  Player would go and talk to DEEP_THOUGHT (computer's name) and convince it
+	  to let the player leave the base.
+	  
+For Anjack -
+Need a way of adding logic to the dialog menus to enable and disable selections.
