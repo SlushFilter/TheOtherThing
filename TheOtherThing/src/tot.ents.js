@@ -40,7 +40,7 @@ Crafty.c("NewScientist", {
         this.setBearing(TOT.CONST.BEARING.DOWN);
 		// Temp code for testing dialog. Remove this before commit.
 		this.actualize = function() {
-			Crafty.e("Menu").setLayout(1).setTalker(this).loadDialog(TOT.DATA.DIALOG.DIALOG_STANDARD);
+			Crafty.e("Menu").setTalker(this).loadDialog(TOT.DATA.DIALOG.DIALOG_STANDARD);
 		};
 	} ,
 });
@@ -142,10 +142,10 @@ Crafty.c("TestMob", {
 		this.actualize = this.actScience;
 	},
 	actScience: function() {
-		Crafty.e("Menu").setLayout(1).setTalker(this).loadDialog(TOT.DATA.DIALOG.DIALOG_STANDARD);
+		Crafty.e("Menu").setLayout(2).setTalker(this).loadDialog(TOT.DATA.DIALOG.DIALOG_STANDARD);
 		console.log("I am a scientist. Please do not be a monster!");
 		if(this.think !== TOT.ENTS.AI_BrainDead){ // Temporary hack to stop player talking to itself.
-			Crafty.e("Menu").setTalker(this).loadDialog(TOT.DATA.DIALOG.DIALOG_STANDARD);
+			Crafty.e("Menu").setLayout(2).setTalker(this).loadDialog(TOT.DATA.DIALOG.DIALOG_STANDARD);
 		};
 		// TOT.ENTS.Assimilate(this);
 		// this.think = TOT.ENTS.AI_BrainDead;

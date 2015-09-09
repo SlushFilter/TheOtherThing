@@ -20,7 +20,10 @@ Menu system requirements:
 		- Must be able to change or animate these sprites.
 		- Must be able to change opacity (alpha) of sprites.
 	- Must have option to exit dialog prematurely.
+	- 256 x 320 support for sprites in vertical menu system.
 
 Dialog system requirements:
 	- Must dynamically load dialog from file.
 	- Must be able to execute methods within loaded dialog objects.
+	- Add boolean so that certain dialog paths can be made available only to certain NPCs/situations
+		- Add setter / getter to Selection object for "isEnabled" state.

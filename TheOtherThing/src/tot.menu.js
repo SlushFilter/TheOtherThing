@@ -53,9 +53,10 @@ Crafty.c("Selectionable", {
 			this.selection_objects_array.push(text_objects_array[i]);
 			this.temp_text = Crafty.e("2D, DOM, Text")
 				.attr({
-					x: this.menu.x + (this.menu.w / 2) - 150,
+					// TODO: This should be moar dynamic.
+					x: this.menu.x + (this.menu.w / 2) - 100,
 					y: ((i+1) * 25) + this.primaryTextY + this.primary_text.h,
-					w: this.text_width
+					w: 200
 					})
 				.text(text_objects_array[i].selection_text)
 				.textColor('white');
@@ -107,7 +108,9 @@ Crafty.c("Menu", {
 	talker: null, // Reference to the entity who is talking.
 	assimilating: false, // So we can properly re-enable movement controls when not assimilating.
 	
-	default_layouts: [ // TODO: Move to data file?
+	default_layouts: [
+		// TODO: Move to data file?
+		// TODO: Add hardpoints for text and sprites.
 		{
 			// Layout 0: Dialog window centered and takes up 75% of the screen. Main text centered in top 1/3 of window. Selection text centered in bottom 2/3.
 			x: null,
@@ -152,8 +155,10 @@ Crafty.c("Menu", {
 			ofsX: null,
 			ofsY: null,
 			setLayout: function(viewport_object){
-				this.height = 0.95 * viewport_object._h;
-				this.width = 0.5 * viewport_object._w;
+				// this.height = 0.95 * viewport_object._h;
+				// this.width = 0.5 * viewport_object._w;
+				this.height = 320;
+				this.width = 256;
 				this.ofsX = viewport_object._w - this.width;
 				this.ofsY = (viewport_object._h - this.height) / 2;
 				this.x = viewport_object._x + this.ofsX;
@@ -226,7 +231,8 @@ Crafty.c("Menu", {
 		});
 		
 		// Create MenuBackground entity and set dimensions & color
-		this.menu = Crafty.e("MenuBackground").setAttr(this.current_layout).color("blue");
+		this.menu = Crafty.e("MenuBackground").setAttr(this.current_layout);//.color("blue");
+		this.menu.setBorder();
 		this.attach(this.menu);
 		
 		// Create cursor entity.
@@ -257,10 +263,15 @@ Crafty.c("Menu", {
 		};
 		
 		this.primary_text = Crafty.e("2D, DOM, Text")
-			.attr( { x: this.menu.x + (this.menu.w / 2) - (this.text_width / 2), 
-					 y: this.primaryTextY, w: this.text_width} )
-			.text(this.dialog_tree[next_index].challenge_text)
-			.textColor('white'); 
+			.text(this.dialog_tree[next_index].challenge_text).textColor('white')
+			.attr( { x: this.menu.x + ((this.menu.w / 2) - 100), y: this.primaryTextY, w: 200} );
+		// this.primary_text.x = this.menu.x + ((this.menu.w / 2) - 100);
+		// this.primary_text.y = this.primaryTextY;
+		// this.w = 200;
+		
+		//.attr( { x: this.menu.x + ((this.menu.w / 2) - (this.primary_text.width / 2)), 
+			//		 y: this.primaryTextY, w: this.text_width} )
+			
 		
 		// Should this be a child of the background entity? Would that destroy all text when we destroy the background entity?
 		// Calling this.menu.destroy() would recursiveley destroy all of its children... so yes ? :)
@@ -274,6 +285,7 @@ Crafty.c("Menu", {
 
 // So this will eventually load sprites (or just one if it's fixed size) for menu background and borders
 Crafty.c("MenuBackground", {
+	// TODO: Load background sprites into array
 	_ofsX : 0,
 	_ofsY : 0,
 	// Need to store sprites for borders and background.
@@ -291,6 +303,51 @@ Crafty.c("MenuBackground", {
 		this.x = layout_object.x;
 		this.y = layout_object.y;
 		return this;
+	},
+	
+	// TODO: Change this so it calls a function to create each sprite, instead of creating them inline as it currently is doing.
+	setBorder: function() {
+		// Default border for now
+		this.tile_width = 16;
+		this.tile_height = 16;
+		this.columns = Math.floor(this.w / this.tile_width);
+		this.column_offset = this.w % this.tile_width;
+		this.rows = Math.floor(this.h / this.tile_height);
+		this.row_offset = this.h % this.tile_height;
+		for(var y = 0; y <= this.rows; y++){
+			for(var x = 0; x <= this.columns; x++){
+				// Draw each tile in the row
+				if (x === 0) {
+					if (y === 0) {
+						// If y and x are 0, draw first tile.
+						this.attach(Crafty.e("2D, DOM, border1_top_left").attr({x: this.x, y: this.y}));
+					} else if (y === this.rows) {
+						this.attach(Crafty.e("2D, DOM, border1_bottom_left").attr({x: this.x, y: this.y + (this.h - 16)}));
+					} else {
+						this.attach(Crafty.e("2D, DOM, border1_left").attr({x: this.x, y: this.y + (this.tile_height * y)}));
+					};
+				} else if (x === this.columns) {
+					if (y === 0) {
+						// If y is 0, this is a corner tile.
+						this.attach(Crafty.e("2D, DOM, border1_top_right").attr({x: this.x + (this.w - 16), y: this.y}));
+					} else if (y === this.rows) {
+						this.attach(Crafty.e("2D, DOM, border1_bottom_right").attr({x: this.x + (this.w - 16), y: this.y + (this.h - 16)}));
+					} else {
+						this.attach(Crafty.e("2D, DOM, border1_right").attr({x: this.x + (this.w - 16), y: this.y + (this.tile_height * y)}));
+					};
+				} else if (y === 0) {
+					this.attach(Crafty.e("2D, DOM, border1_top").attr({x: this.x + (this.tile_width * x), y: this.y}));
+				} else if (y === this.rows) {
+					this.attach(Crafty.e("2D, DOM, border1_bottom").attr({x: this.x + (this.tile_width * x), y: this.y + (this.h - 16)}));
+				} else {
+					this.attach(Crafty.e("2D, DOM, border1_fill").attr({x: this.x + (this.tile_width * x), y: this.y + (this.tile_height * y)}));
+				};
+			};
+		};
+	},
+	
+	drawBorder: function(x, y, tile_index) {
+		
 	}
 });
 

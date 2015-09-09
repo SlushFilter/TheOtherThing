@@ -43,6 +43,21 @@ TOT.DATA.SPRITEDEF = {
 			tile: 640,
 			tileh: 480,
 			map: { help_screen: [0,0] }
+		},
+		"menu_9.png": {
+			tile: 16,
+			tileh: 16,
+			map: {
+				border1_top_left: [0,0],
+				border1_top: [1,0],
+				border1_top_right: [2,0],
+				border1_left: [0,1],
+				border1_fill: [1,1],
+				border1_right: [2,1],
+				border1_bottom_left: [0,2],
+				border1_bottom: [1,2],
+				border1_bottom_right: [2,2]
+			}
 		}
 	}
 };
