@@ -340,28 +340,36 @@ Crafty.c("MenuBackground", {
 		this.sprite_height = this.sprite_object.tileh;
 		this.columns = Math.floor(this.w / this.sprite_width);
 		this.rows = Math.floor(this.h / this.sprite_height);
-		
+		// Cycle through columns and rows
 		for (var y = 0; y <= this.rows; y++) {
+			// Default offset is 0.
 			this.ofsY = 0;
+			// Default sprite.
+			this.current_sprite_y = 1;
 			if(y === 0) {
+				// Left side.
 				this.current_sprite_y = 0;
 			} else if (y === this.rows) {
+				// Right side.
 				this.current_sprite_y = 2;
+				// If we're on the right side, correct for imperfect menu "resolution".
 				this.ofsY = this.sprite_height;
-			} else {
-				this.current_sprite_y = 1;
 			};
 			for (var x = 0; x <= this.columns; x++) {
+				// Default offset is 0.
 				this.ofsX = 0;
+				// Default sprite.
+				this.current_sprite_x = 1;
 				if(x === 0) {
+					// Top row.
 					this.current_sprite_x = 0;
 				} else if (x === this.columns) {
+					// Bottom row.
 					this.current_sprite_x = 2;
+					// If we're on the bottom, correct for imperfect menu "resolution".
 					this.ofsX = this.sprite_width;
-				} else {
-					this.current_sprite_x = 1;
 				};
-				// Place the sprite and attach it to this so that it is destroyed properly.
+				// Place the sprite and attach it to "this" so that it is destroyed properly.
 				this.attach(Crafty.e("MenuSprite").placeSprite(this.x + (x * this.sprite_width) - this.ofsX, this.y + (y * this.sprite_height) - this.ofsY, this.sprite_list_2d[this.current_sprite_y][this.current_sprite_x]));
 			};
 		};
