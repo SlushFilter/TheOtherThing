@@ -341,24 +341,31 @@ Crafty.c("MenuBackground", {
 						// If y and x are 0, draw first tile.
 						this.attach(Crafty.e("MenuSprite").placeSprite(this.x, this.y, this.sprite_list[0]));
 					} else if (y === this.rows) {
+						// If x is 0 and y is max, this is a corner tile.
 						this.attach(Crafty.e("MenuSprite").placeSprite(this.x, this.y + (this.h - this.sprite_height), this.sprite_list[6]));
 					} else {
+						// Left border.
 						this.attach(Crafty.e("MenuSprite").placeSprite(this.x, this.y + (this.sprite_height * y), this.sprite_list[3]));
 					};
 				} else if (x === this.columns) {
 					if (y === 0) {
-						// If y is 0, this is a corner tile.
+						// If x is max and y is 0, this is a corner tile.
 						this.attach(Crafty.e("MenuSprite").placeSprite(this.x + (this.w - this.sprite_width), this.y, this.sprite_list[2]));
 					} else if (y === this.rows) {
+						// If both x and y are max, this is a corner tile.
 						this.attach(Crafty.e("MenuSprite").placeSprite(this.x + (this.w - this.sprite_width), this.y + (this.h - this.sprite_height), this.sprite_list[8]));
 					} else {
+						// Right border.
 						this.attach(Crafty.e("MenuSprite").placeSprite(this.x + (this.w - this.sprite_width), this.y + (this.sprite_height * y), this.sprite_list[5]));
 					};
 				} else if (y === 0) {
+					// Top border.
 					this.attach(Crafty.e("MenuSprite").placeSprite(this.x + (this.sprite_width * x), this.y, this.sprite_list[1]));
 				} else if (y === this.rows) {
+					// Bottom border.
 					this.attach(Crafty.e("MenuSprite").placeSprite(this.x + (this.sprite_width * x), this.y + (this.h - this.sprite_height), this.sprite_list[7]));
 				} else {
+					// Background fill.
 					this.attach(Crafty.e("MenuSprite").placeSprite(this.x + (this.sprite_width * x), this.y + (this.sprite_height * y), this.sprite_list[4]));
 				};
 			};
