@@ -283,17 +283,36 @@ Crafty.c("Menu", {
 	},
 });
 
+// Component for handling all sprites which are used in the menu system.
+Crafty.c("MenuSprite", {
+	init: function() {
+		this.addComponent("2D, DOM");
+	},
+	placeSprite(x, y, sprite){
+		this.x = x;
+		this.y = y;
+		this.addComponent(sprite);
+		return this;
+	}
+});
+
 // So this will eventually load sprites (or just one if it's fixed size) for menu background and borders
 Crafty.c("MenuBackground", {
 	// TODO: Load background sprites into array
-	_ofsX : 0,
-	_ofsY : 0,
-	// Need to store sprites for borders and background.
-	border_sprites: [],
-	background_sprite: null,
+	sprite_list: [],
+	sprite_object: null,
+	sprite_width: null,
+	sprite_height: null,
 	
 	init: function() {
 		this.requires("2D, DOM, Color");
+		// Build list of sprites.
+		// map: 3x3 from left to right and top to bottom:
+		// 0, 1, 2
+		// 3, 4, 5
+		// 6, 7, 8
+		this.sprite_object = TOT.DATA.SPRITEDEF.sprites["menu_9.png"];
+		this.sprite_list = Object.keys(this.sprite_object.map);
 	},
 	
 	setAttr: function(layout_object) {
@@ -305,42 +324,42 @@ Crafty.c("MenuBackground", {
 		return this;
 	},
 	
-	// TODO: Change this so it calls a function to create each sprite, instead of creating them inline as it currently is doing.
+	// TODO: Change this so it calls a function to create each sprite, instead of creating them inline as it currently is doing. Maybe?
 	setBorder: function() {
 		// Default border for now
-		this.tile_width = 16;
-		this.tile_height = 16;
-		this.columns = Math.floor(this.w / this.tile_width);
-		this.column_offset = this.w % this.tile_width;
-		this.rows = Math.floor(this.h / this.tile_height);
-		this.row_offset = this.h % this.tile_height;
+		this.sprite_width = this.sprite_object.tile;
+		this.sprite_height = this.sprite_object.tileh;
+		this.columns = Math.floor(this.w / this.sprite_width);
+		this.column_offset = this.w % this.sprite_width;
+		this.rows = Math.floor(this.h / this.sprite_height);
+		this.row_offset = this.h % this.sprite_height;
 		for(var y = 0; y <= this.rows; y++){
 			for(var x = 0; x <= this.columns; x++){
 				// Draw each tile in the row
 				if (x === 0) {
 					if (y === 0) {
 						// If y and x are 0, draw first tile.
-						this.attach(Crafty.e("2D, DOM, border1_top_left").attr({x: this.x, y: this.y}));
+						this.attach(Crafty.e("MenuSprite").placeSprite(this.x, this.y, this.sprite_list[0]));
 					} else if (y === this.rows) {
-						this.attach(Crafty.e("2D, DOM, border1_bottom_left").attr({x: this.x, y: this.y + (this.h - 16)}));
+						this.attach(Crafty.e("MenuSprite").placeSprite(this.x, this.y + (this.h - this.sprite_height), this.sprite_list[6]));
 					} else {
-						this.attach(Crafty.e("2D, DOM, border1_left").attr({x: this.x, y: this.y + (this.tile_height * y)}));
+						this.attach(Crafty.e("MenuSprite").placeSprite(this.x, this.y + (this.sprite_height * y), this.sprite_list[3]));
 					};
 				} else if (x === this.columns) {
 					if (y === 0) {
 						// If y is 0, this is a corner tile.
-						this.attach(Crafty.e("2D, DOM, border1_top_right").attr({x: this.x + (this.w - 16), y: this.y}));
+						this.attach(Crafty.e("MenuSprite").placeSprite(this.x + (this.w - this.sprite_width), this.y, this.sprite_list[2]));
 					} else if (y === this.rows) {
-						this.attach(Crafty.e("2D, DOM, border1_bottom_right").attr({x: this.x + (this.w - 16), y: this.y + (this.h - 16)}));
+						this.attach(Crafty.e("MenuSprite").placeSprite(this.x + (this.w - this.sprite_width), this.y + (this.h - this.sprite_height), this.sprite_list[8]));
 					} else {
-						this.attach(Crafty.e("2D, DOM, border1_right").attr({x: this.x + (this.w - 16), y: this.y + (this.tile_height * y)}));
+						this.attach(Crafty.e("MenuSprite").placeSprite(this.x + (this.w - this.sprite_width), this.y + (this.sprite_height * y), this.sprite_list[5]));
 					};
 				} else if (y === 0) {
-					this.attach(Crafty.e("2D, DOM, border1_top").attr({x: this.x + (this.tile_width * x), y: this.y}));
+					this.attach(Crafty.e("MenuSprite").placeSprite(this.x + (this.sprite_width * x), this.y, this.sprite_list[1]));
 				} else if (y === this.rows) {
-					this.attach(Crafty.e("2D, DOM, border1_bottom").attr({x: this.x + (this.tile_width * x), y: this.y + (this.h - 16)}));
+					this.attach(Crafty.e("MenuSprite").placeSprite(this.x + (this.sprite_width * x), this.y + (this.h - this.sprite_height), this.sprite_list[7]));
 				} else {
-					this.attach(Crafty.e("2D, DOM, border1_fill").attr({x: this.x + (this.tile_width * x), y: this.y + (this.tile_height * y)}));
+					this.attach(Crafty.e("MenuSprite").placeSprite(this.x + (this.sprite_width * x), this.y + (this.sprite_height * y), this.sprite_list[4]));
 				};
 			};
 		};
