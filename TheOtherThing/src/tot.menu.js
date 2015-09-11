@@ -11,6 +11,8 @@ Crafty.c("Selectionable", {
 	selection_current: 0,
 	selection_max: 3, // Need to dynamically load this from object?
 	
+	previous_text_height: 0, // Combined height of all text above text currently being drawn.
+	
 	
 	init: function(){
 		this.requires("Menu, KeyboardControl");
@@ -84,16 +86,21 @@ Crafty.c("Selectionable", {
 	
 	// Call this for the initial draw and on relevant keypresses to change the "highlighted" text.
 	redrawSelectionText: function() {
+		this.previous_text_height = this.primaryTextY + this.primary_text._element.scrollHeight;
 		// Display selectable options.
 		for(var i = 0; i < this.selection_text_array.length; i++){
+			this.selection_text_array[i].h = this.selection_text_array[i]._element.scrollHeight;
+			this.selection_text_array[i].y = this.previous_text_height;
+			this.previous_text_height += this.selection_text_array[i].h;
 			if(i === this.selection_current){
-				this.selection_text_array[i].textColor('green').textFont({ weight: 'bold' });
+				this.selection_text_array[i].textColor('green');//.textFont({ weight: 'bold' });
 				this.cursor.x = this.selection_text_array[i].x - 10;
 				this.cursor.y = this.selection_text_array[i].y;
 			} else {
 				this.selection_text_array[i].textColor('white').textFont({ weight: 'normal' });
 			};
 		};
+		this.previous_text_height = 0;
 	},
 	
 });
@@ -256,26 +263,21 @@ Crafty.c("Menu", {
 
 	// Function to load NEXT_DIALOG node.
 	nextDialog: function(next_index){
+		
 		this.clearSelectionText();
 		
+		// Remove old text.
 		if(this.primary_text){
 			this.primary_text.destroy();
 		};
 		
+		// Set new text.
 		this.primary_text = Crafty.e("2D, DOM, Text")
 			.text(this.dialog_tree[next_index].challenge_text).textColor('white')
 			.attr( { x: this.menu.x + ((this.menu.w / 2) - 100), y: this.primaryTextY, w: 200} );
-		// this.primary_text.x = this.menu.x + ((this.menu.w / 2) - 100);
-		// this.primary_text.y = this.primaryTextY;
-		// this.w = 200;
+		this.primary_text.h = this.primary_text._element.scrollHeight;
+		console.log(`Primary text height: ${this.primary_text.h}\nShould be: ${this.primary_text._element.scrollHeight}`);
 		
-		//.attr( { x: this.menu.x + ((this.menu.w / 2) - (this.primary_text.width / 2)), 
-			//		 y: this.primaryTextY, w: this.text_width} )
-			
-		
-		// Should this be a child of the background entity? Would that destroy all text when we destroy the background entity?
-		// Calling this.menu.destroy() would recursiveley destroy all of its children... so yes ? :)
-		// THANK YOU FOR YOUR INPUT!
 		this.attach(this.primary_text);
 		
 		// Display selectable options.
@@ -291,15 +293,12 @@ Crafty.c("MenuSprite", {
 	placeSprite(x, y, sprite){
 		this.x = x;
 		this.y = y;
-		console.log(sprite);
 		this.addComponent(sprite);
 		return this;
 	}
 });
 
-// So this will eventually load sprites (or just one if it's fixed size) for menu background and borders
 Crafty.c("MenuBackground", {
-	// TODO: Load background sprites into array
 	sprite_list: [],
 	sprite_list_2d: [],
 	sprite_object: null,
@@ -307,6 +306,8 @@ Crafty.c("MenuBackground", {
 	sprite_height: null,
 	current_sprite_x: 0,
 	current_sprite_y: 0,
+	// Use the offset on bottom and right side to account for imperfect menu
+	// "resolution".
 	ofsY: 0,
 	ofsX: 0,
 	
@@ -317,6 +318,7 @@ Crafty.c("MenuBackground", {
 		// 0, 1, 2
 		// 3, 4, 5
 		// 6, 7, 8
+		// This is hard-coded for now. Need to allow for sprite selection.
 		this.sprite_object = TOT.DATA.SPRITEDEF.sprites["menu_9.png"];
 		this.sprite_list = Object.keys(this.sprite_object.map);
 		for(var i = 0; i < 3; i++) {
@@ -325,7 +327,7 @@ Crafty.c("MenuBackground", {
 	},
 	
 	setAttr: function(layout_object) {
-		console.log("Setting attributes.");
+		// Configure attributes.
 		this.w = layout_object.width;
 		this.h = layout_object.height;
 		this.x = layout_object.x;
@@ -333,51 +335,35 @@ Crafty.c("MenuBackground", {
 		return this;
 	},
 	
-	// TODO: Change this so it calls a function to create each sprite, instead of creating them inline as it currently is doing. Maybe?
+	// Default border for now
+	// Need to add parameter to specify sprite tileset.
 	setBorder: function() {
-		// Default border for now
 		this.sprite_width = this.sprite_object.tile;
 		this.sprite_height = this.sprite_object.tileh;
 		this.columns = Math.floor(this.w / this.sprite_width);
 		this.rows = Math.floor(this.h / this.sprite_height);
-		// Cycle through columns and rows
 		for (var y = 0; y <= this.rows; y++) {
-			// Default offset is 0.
 			this.ofsY = 0;
-			// Default sprite.
 			this.current_sprite_y = 1;
 			if(y === 0) {
-				// Left side.
 				this.current_sprite_y = 0;
 			} else if (y === this.rows) {
-				// Right side.
 				this.current_sprite_y = 2;
-				// If we're on the right side, correct for imperfect menu "resolution".
 				this.ofsY = this.sprite_height;
 			};
 			for (var x = 0; x <= this.columns; x++) {
-				// Default offset is 0.
 				this.ofsX = 0;
-				// Default sprite.
 				this.current_sprite_x = 1;
 				if(x === 0) {
-					// Top row.
 					this.current_sprite_x = 0;
 				} else if (x === this.columns) {
-					// Bottom row.
 					this.current_sprite_x = 2;
-					// If we're on the bottom, correct for imperfect menu "resolution".
 					this.ofsX = this.sprite_width;
 				};
-				// Place the sprite and attach it to "this" so that it is destroyed properly.
 				this.attach(Crafty.e("MenuSprite").placeSprite(this.x + (x * this.sprite_width) - this.ofsX, this.y + (y * this.sprite_height) - this.ofsY, this.sprite_list_2d[this.current_sprite_y][this.current_sprite_x]));
 			};
 		};
 	},
-	
-	drawBorder: function(x, y, tile_index) {
-		
-	}
 });
 
 // Create and position the cursor.
