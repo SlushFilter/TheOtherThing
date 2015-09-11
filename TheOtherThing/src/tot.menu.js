@@ -1,5 +1,16 @@
 // Menus
 
+Crafty.c("LoadChecker", {
+	init: function(){
+		this.bind("PreRender", function() {
+			console.log("PRE-RENDERING A THING!");
+		});
+		document.getElementById(this.getDomId()).onload = function(){
+			console.log("ELEMENT LOADED!");
+		};
+	},
+});
+
 Crafty.c("Selectionable", {
 	// TODO: Refactor the shit out of this.
 	SELECTION_UP: Crafty.keys.UP_ARROW,
@@ -71,6 +82,9 @@ Crafty.c("Selectionable", {
 			};
 			this.selection_text_array.push(this.temp_text);
 			this.attach(this.temp_text);
+			this.temp_text.one("PostRender", function() {
+				this._parent.redrawSelectionText();
+			});
 		};
 		this.selection_max = this.selection_text_array.length - 1;
 	},
@@ -212,19 +226,18 @@ Crafty.c("Menu", {
 		console.log("Creating menu.");
 		this.requires("2D, DOM, Selectionable");
 		Crafty.audio.play("selection_execute_sound");
-		
 	} ,
 	
 	setLayout: function(layout_index) {
 		// Set current layout
 		// TODO: Simplify this.
 		this.current_layout = this.default_layouts[layout_index];
-		temp_viewport_object = new Object();
-		temp_viewport_object._x = Crafty.viewport.rect_object._x;
-		temp_viewport_object._y = Crafty.viewport.rect_object._y;
-		temp_viewport_object._h = Crafty.viewport.height;
-		temp_viewport_object._w = Crafty.viewport.width;
-		this.current_layout.setLayout(temp_viewport_object);
+		this.temp_viewport_object = new Object();
+		this.temp_viewport_object._x = Crafty.viewport.rect_object._x;
+		this.temp_viewport_object._y = Crafty.viewport.rect_object._y;
+		this.temp_viewport_object._h = Crafty.viewport.height;
+		this.temp_viewport_object._w = Crafty.viewport.width;
+		this.current_layout.setLayout(this.temp_viewport_object);
 		return this;
 	},
 	

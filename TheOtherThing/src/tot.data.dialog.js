@@ -29,11 +29,11 @@ function DialogNode(node_index, challenge_text, selections){
 
 // Selection constructor
 function Selection(selection_text, next_dialog, result, action_execute){
-	temp_object = new Object();
-	temp_object.selection_text = selection_text;
-	temp_object.next_dialog = next_dialog;
-	temp_object.result = result;
-	temp_object.action_execute = action_execute || function(menu_object) {
+	this.temp_object = new Object();
+	this.temp_object.selection_text = selection_text;
+	this.temp_object.next_dialog = next_dialog;
+	this.temp_object.result = result;
+	this.temp_object.action_execute = action_execute || function(menu_object) {
 		// Normal behavior is to move to the next dialog node or exit dialog.
 		// TODO: Insert code to increase/decrease suspicion level.
 		if(Math.abs(this.result) < 2){
@@ -54,7 +54,7 @@ function Selection(selection_text, next_dialog, result, action_execute){
 		};
 	};
 	
-	return temp_object;
+	return this.temp_object;
 };
 
 TOT.DATA.DIALOG = {
