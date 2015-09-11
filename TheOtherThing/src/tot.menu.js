@@ -23,7 +23,7 @@ Crafty.c("Selectionable", {
 	selection_max: 3, // Need to dynamically load this from object?
 	
 	previous_text_height: 0, // Combined height of all text above text currently being drawn.
-	
+	total_selection_text_height: 0, // Just the height of the selectionables.
 	
 	init: function(){
 		this.requires("Menu, KeyboardControl");
@@ -62,27 +62,26 @@ Crafty.c("Selectionable", {
 	
 	// Load the selectionables.
 	loadSelectionText: function(text_objects_array){
+		this.total_selection_text_height = 0;
 		for(var i = 0; i < text_objects_array.length; i++){
 			this.selection_objects_array.push(text_objects_array[i]);
 			this.temp_text = Crafty.e("2D, DOM, Text")
 				.attr({
 					// TODO: This should be moar dynamic.
-					x: this.menu.x + (this.menu.w / 2) - 100,
+					x: this.current_layout.text_x,
 					y: ((i+1) * 25) + this.primaryTextY + this.primary_text.h,
-					w: 200
+					w: 200,
+					alpha: 0
 					})
 				.text(text_objects_array[i].selection_text)
 				.textColor('white');
-			if(i === this.selection_current){
-				this.temp_text.textFont({
-					weight: 'bold',
-				}).textColor('green');
-				this.cursor.x = this.temp_text.x - 10;
-				this.cursor.y = this.temp_text.y;
-			};
 			this.selection_text_array.push(this.temp_text);
 			this.attach(this.temp_text);
+			// Hack to fix text layout.
+			// Perhaps the text area should be pre-calculated?
+			// Or, each layout should have a max string size.
 			this.temp_text.one("PostRender", function() {
+				this._parent.total_selection_text_height += this._element.scrollHeight;
 				this._parent.redrawSelectionText();
 			});
 		};
@@ -98,13 +97,22 @@ Crafty.c("Selectionable", {
 		this.selection_objects_array = [];
 	},
 	
+	// Note: Text is given an alpha value of 0 when first created so that we don't get text jumping all over the screen when we initially center everything. On redraw, text alpha is set to 1.
 	// Call this for the initial draw and on relevant keypresses to change the "highlighted" text.
 	redrawSelectionText: function() {
+		// TODO: Make these run only the first time.
+		this.centerText();
 		this.previous_text_height = this.primaryTextY + this.primary_text._element.scrollHeight;
+		this.primary_text.y = this.primaryTextY;
+		this.primary_text.attr({alpha: 1}); // More hackery.
+		
 		// Display selectable options.
 		for(var i = 0; i < this.selection_text_array.length; i++){
-			this.selection_text_array[i].h = this.selection_text_array[i]._element.scrollHeight;
-			this.selection_text_array[i].y = this.previous_text_height;
+			this.selection_text_array[i].attr({
+			h: this.selection_text_array[i]._element.scrollHeight,
+			y: this.previous_text_height,
+			alpha: 1,
+			});
 			this.previous_text_height += this.selection_text_array[i].h;
 			if(i === this.selection_current){
 				this.selection_text_array[i].textColor('green');//.textFont({ weight: 'bold' });
@@ -115,6 +123,11 @@ Crafty.c("Selectionable", {
 			};
 		};
 		this.previous_text_height = 0;
+	},
+	
+	centerText: function() {
+		// Center text and set primaryTextY based on height of all menu text.
+		this.primaryTextY = this.current_layout.y + ((this.current_layout.height / 2) - ((this.total_selection_text_height + this.primary_text_height) / 2));
 	},
 	
 });
@@ -128,98 +141,8 @@ Crafty.c("Menu", {
 	primary_text: null,
 	talker: null, // Reference to the entity who is talking.
 	assimilating: false, // So we can properly re-enable movement controls when not assimilating.
+	primary_text_height: 0,
 	
-	default_layouts: [
-		// TODO: Move to data file?
-		// TODO: Add hardpoints for text and sprites.
-		{
-			// Layout 0: Dialog window centered and takes up 75% of the screen. Main text centered in top 1/3 of window. Selection text centered in bottom 2/3.
-			x: null,
-			y: null,
-			width: null,
-			height: null,
-			ofsX: null,
-			ofsY: null,
-			setLayout: function(viewport_object) {
-				this.height = 0.5 * viewport_object._h;
-				this.width = 0.75 * viewport_object._w;
-				this.ofsX = (viewport_object._w - this.width) / 2;
-				this.ofsY = (viewport_object._h - this.height) / 2;
-				this.x = viewport_object._x + this.ofsX;
-				this.y = viewport_object._y + this.ofsY;
-			}
-		},
-		{
-			// Layout 1: Dialog window centered in bottom 1/2 of screen. Images dynamically positioned in top 1/2 of screen. Text as in Layout 1.
-			x: null,
-			y: null,
-			width: null,
-			height: null,
-			ofsX: null,
-			ofsY: null,
-			setLayout: function(viewport_object){
-				this.height = 0.5 * viewport_object._h;
-				this.width = 0.85 * viewport_object._w;
-				this.ofsX = (viewport_object._w - this.width) / 2;
-				this.ofsY = viewport_object._h - this.height;
-				this.x = viewport_object._x + this.ofsX;
-				this.y = viewport_object._y + this.ofsY;
-				
-			}
-		},
-		{
-			// Layout 2: Dialog window positioned in right or left 1/2 of screen. Images dynamically positioned in opposite 1/2. Text as in other layouts.
-			x: null,
-			y: null,
-			width: null,
-			height: null,
-			ofsX: null,
-			ofsY: null,
-			setLayout: function(viewport_object){
-				// this.height = 0.95 * viewport_object._h;
-				// this.width = 0.5 * viewport_object._w;
-				this.height = 320;
-				this.width = 256;
-				this.ofsX = viewport_object._w - this.width;
-				this.ofsY = (viewport_object._h - this.height) / 2;
-				this.x = viewport_object._x + this.ofsX;
-				this.y = viewport_object._y + this.ofsY;
-			}
-		},
-		{
-			// Layout 3: Dialog window takes up entire screen.
-			x: null,
-			y: null,
-			width: null,
-			height: null,
-			setLayout: function(viewport_object){
-				this.height = viewport_object._h;
-				this.width = viewport_object._w;
-				this.x = viewport_object._x;
-				this.y = viewport_object._y;
-			}
-		},
-		{
-			// Layout 4: Dialog window height and width each 1/4 of screen. Window positioned in center of bottom half of screen.
-			x: null,
-			y: null,
-			width: null,
-			height: null,
-			ofsX: null,
-			ofsY: null,
-			setLayout: function(viewport_object){
-				this.height = viewport_object._h / 4;
-				this.width = viewport_object._w / 4;
-				this.ofsX = (viewport_object._w - this.width) / 2;
-				this.ofsY = (viewport_object._h / 2) + (this.height / 2);
-				this.x = viewport_object._x + this.ofsX;
-				this.y = viewport_object._y + this.ofsY;
-			}
-		},
-		{
-			// Layout 5: Do we need a blank layout or an invisible menu background?
-		}
-	],
 	current_layout: null,
 	
 	init: function(){
@@ -231,7 +154,8 @@ Crafty.c("Menu", {
 	setLayout: function(layout_index) {
 		// Set current layout
 		// TODO: Simplify this.
-		this.current_layout = this.default_layouts[layout_index];
+		// this.current_layout = this.default_layouts[layout_index];
+		this.current_layout = TOT.DATA.MENU_LAYOUTS.DEFAULT_LAYOUTS[layout_index];
 		this.temp_viewport_object = new Object();
 		this.temp_viewport_object._x = Crafty.viewport.rect_object._x;
 		this.temp_viewport_object._y = Crafty.viewport.rect_object._y;
@@ -287,9 +211,10 @@ Crafty.c("Menu", {
 		// Set new text.
 		this.primary_text = Crafty.e("2D, DOM, Text")
 			.text(this.dialog_tree[next_index].challenge_text).textColor('white')
-			.attr( { x: this.menu.x + ((this.menu.w / 2) - 100), y: this.primaryTextY, w: 200} );
-		this.primary_text.h = this.primary_text._element.scrollHeight;
-		console.log(`Primary text height: ${this.primary_text.h}\nShould be: ${this.primary_text._element.scrollHeight}`);
+			.attr( { x: this.current_layout.text_x, y: this.primaryTextY, w: 200, alpha: 0} );
+		this.primary_text.one("PostRender", function(){
+			this._parent.primary_text_height += this._element.scrollHeight;
+		});
 		
 		this.attach(this.primary_text);
 		
@@ -386,6 +311,6 @@ Crafty.c("MenuSelector", {
 		this.requires("2D, DOM, Color");
 		this.color(0,255, 128);
 		this.w = 8;
-		this.h = 8;
+		this.h = 10;
 	},
 });
