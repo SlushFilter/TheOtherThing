@@ -1,5 +1,43 @@
 // Menus
 
+
+// In order to implement this, we'll have to redesign the Menu and Selectionables components.
+// TODO: Later.
+Crafty.c("AnimatedText", {
+	
+	time_elapsed: 0, // Time elapsed since the last animation change. Resets each second, approx.
+	substring_len: 0, // How much of the text to display.
+	substring_thing: "", // The text to animate.
+	
+	init: function(){
+		this.requires("2D, DOM, Text");
+	},
+	// TODO: Add parameters to control animation. (Change speed, skip, add SFX, etc)
+	animate: function(text_input){
+		// console.log("Binding to EnterFrame");
+		this.bind("EnterFrame", function(data) {
+			this.time_elapsed += data.dt / 1000;
+			if (this.time_elapsed >= 0.05) {
+				// console.log(`Text: ${this.substring_thing}`);
+				this.substring_thing += text_input.substring(this.substring_len - 1, this.substring_len);
+				this.alpha = 1;
+				this.text(this.substring_thing);
+				this.time_elapsed = 0;
+				this.substring_len += 1;
+			};
+			if (this.substring_len > text_input.length) {
+				this.time_elapsed = 0;
+				this.substring_len = 0;
+				this.unbind("EnterFrame");
+				this._parent.trigger("TextAnimationComplete");
+				// console.log("Text animation complete!");
+			};
+		});
+		return this;
+	},
+	
+});
+
 Crafty.c("LoadChecker", {
 	init: function(){
 		this.bind("PreRender", function() {
