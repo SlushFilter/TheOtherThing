@@ -110,6 +110,8 @@ TOT.DATA.MENU_LAYOUTS = {
 			text_x: null,
 			text_y: null,
 			text_x_padding: null,
+			sprite_x: null,
+			sprite_y: null, // These will be the center point of the sprite. So we need to process this on the other end.
 			setLayout: function(viewport_object){
 				this.text_x_padding = 20;
 				this.height = viewport_object._h / 4;
@@ -120,6 +122,8 @@ TOT.DATA.MENU_LAYOUTS = {
 				this.y = viewport_object._y + this.ofsY;
 				this.text_width = this.width - (this.text_x_padding * 2);
 				this.text_x = this.x + this.text_x_padding;
+				this.sprite_x = viewport_object._x + (viewport_object._w / 2);
+				this.sprite_y = viewport_object._y + ((this.y - viewport_object._y) / 2);
 			}
 		},
 		{

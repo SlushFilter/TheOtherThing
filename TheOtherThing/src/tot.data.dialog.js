@@ -63,7 +63,7 @@ TOT.DATA.DIALOG = {
 	DIALOG_TITLE_SCREEN: [
 		new DialogNode(
 			node_index = 0,
-			challenge_text = "The Other Thing",
+			challenge_text = "",
 			selections = [
 				new Selection(selection_text = "Start Game", next_dialog = 0, result = 0, 
 					new_action = function(menu_object){

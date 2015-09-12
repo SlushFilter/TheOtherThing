@@ -12,7 +12,7 @@ Crafty.c("AnimatedText", {
 	init: function(){
 		this.requires("2D, DOM, Text");
 	},
-	// TODO: Add parameters to control animation. (Change speed, skip, add SFX, etc)
+	// TODO: Add parameters to control animation. (Change speed, skippable, add SFX, etc)
 	animate: function(text_input){
 		// console.log("Binding to EnterFrame");
 		this.bind("EnterFrame", function(data) {
@@ -49,8 +49,8 @@ Crafty.c("LoadChecker", {
 	},
 });
 
+// TODO: Refactor the shit out of this.
 Crafty.c("Selectionable", {
-	// TODO: Refactor the shit out of this.
 	SELECTION_UP: Crafty.keys.UP_ARROW,
 	SELECTION_DOWN: Crafty.keys.DOWN_ARROW,
 	SELECTION_EXECUTE: Crafty.keys.ENTER,
@@ -180,7 +180,6 @@ Crafty.c("Menu", {
 	talker: null, // Reference to the entity who is talking.
 	assimilating: false, // So we can properly re-enable movement controls when not assimilating.
 	primary_text_height: 0,
-	
 	current_layout: null,
 	
 	init: function(){
@@ -203,6 +202,15 @@ Crafty.c("Menu", {
 		return this;
 	},
 	
+	loadSprites: function(sprites_array) {
+		for(var i = 0; i < sprites_array.length; i++) {
+			this.temp_x = this.current_layout.sprite_x - (sprites_array[i].tile / 2);
+			this.temp_y = this.current_layout.sprite_y - (sprites_array[i].tileh / 2);
+			this.attach(Crafty.e("2D, DOM").attr({x: this.temp_x, y: this.temp_y}).addComponent(Object.keys(sprites_array[i].map)));
+		};
+		
+	},
+	
 	loadDialog: function(dialogArray) {
 		this.dialog_tree = dialogArray;
 		Crafty.trigger("ToggleControl"); // Kill movement controls while in menu.
@@ -217,6 +225,7 @@ Crafty.c("Menu", {
 		this.menu.setBorder();
 		this.attach(this.menu);
 		
+		
 		// Create cursor entity.
 		// TODO: Move to selectionable component.
 		this.cursor = Crafty.e("MenuSelector");
@@ -228,6 +237,8 @@ Crafty.c("Menu", {
 		
 		// Commence the convo.
 		this.nextDialog(0);
+		
+		return this;
 	},
 	
 	// Used for actionables. We need to identify the NPC with whom the player is conversing.
