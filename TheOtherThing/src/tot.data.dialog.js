@@ -37,6 +37,7 @@ function Selection(selection_text, next_dialog, result, action_execute){
 		// Normal behavior is to move to the next dialog node or exit dialog.
 		// TODO: Insert code to increase/decrease suspicion level.
 		if(Math.abs(this.result) < 2){
+			Crafty.audio.play("selection_execute_sound");
 			menu_object.nextDialog(this.next_dialog);
 		} else {
 			// A value of +/-2 means the conversation is over.
