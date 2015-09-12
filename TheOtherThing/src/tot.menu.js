@@ -1,14 +1,38 @@
 // Menus
 
-Crafty.c("LoadChecker", {
+Crafty.c("AnimatedText", {
+	
+	time_elapsed: 0, // Time elapsed since the last animation change. Resets each second, approx.
+	substring_len: 0, // How much of the text to display.
+	substring_thing: "",
+	
 	init: function(){
-		this.bind("PreRender", function() {
-			console.log("PRE-RENDERING A THING!");
-		});
-		document.getElementById(this.getDomId()).onload = function(){
-			console.log("ELEMENT LOADED!");
-		};
+		this.requires("2D, DOM, Text");
 	},
+	// TODO: Add parameters to control animation. (Change speed, skip, add SFX, etc)
+	animate: function(text_input){
+		console.log("Binding to EnterFrame");
+		this.bind("EnterFrame", function(data) {
+			this.time_elapsed += data.dt / 1000;
+			if (this.time_elapsed >= 0.05) {
+				// console.log(`Text: ${this.substring_thing}`);
+				this.substring_thing += text_input.substring(this.substring_len - 1, this.substring_len);
+				this.alpha = 1;
+				this.text(this.substring_thing);//text_input.substring(0, this.substring_length));
+				this.time_elapsed = 0;
+				this.substring_len += 1;
+			};
+			if (this.substring_len > text_input.length) {
+				this.time_elapsed = 0;
+				this.substring_len = 0;
+				this.unbind("EnterFrame");
+				this._parent.trigger("TextAnimationComplete");
+				console.log("Text animation complete!");
+			};
+		});
+		return this;
+	},
+	
 });
 
 Crafty.c("Selectionable", {
@@ -62,6 +86,7 @@ Crafty.c("Selectionable", {
 	
 	// Load the selectionables.
 	loadSelectionText: function(text_objects_array){
+		console.log("LOADING SELECTIONABLES!");
 		this.total_selection_text_height = 0;
 		for(var i = 0; i < text_objects_array.length; i++){
 			this.selection_objects_array.push(text_objects_array[i]);
@@ -81,6 +106,7 @@ Crafty.c("Selectionable", {
 			// Perhaps the text area should be pre-calculated?
 			// Or, each layout should have a max string size.
 			this.temp_text.one("PostRender", function() {
+				console.log("POST RENDER!");
 				this._parent.total_selection_text_height += this._element.scrollHeight;
 				this._parent.redrawSelectionText();
 			});
@@ -104,25 +130,30 @@ Crafty.c("Selectionable", {
 		this.centerText();
 		this.previous_text_height = this.primaryTextY + this.primary_text._element.scrollHeight;
 		this.primary_text.y = this.primaryTextY;
-		this.primary_text.attr({alpha: 1}); // More hackery.
-		
-		// Display selectable options.
-		for(var i = 0; i < this.selection_text_array.length; i++){
-			this.selection_text_array[i].attr({
-			h: this.selection_text_array[i]._element.scrollHeight,
-			y: this.previous_text_height,
-			alpha: 1,
-			});
-			this.previous_text_height += this.selection_text_array[i].h;
-			if(i === this.selection_current){
-				this.selection_text_array[i].textColor('green');//.textFont({ weight: 'bold' });
-				this.cursor.x = this.selection_text_array[i].x - 10;
-				this.cursor.y = this.selection_text_array[i].y;
-			} else {
-				this.selection_text_array[i].textColor('white').textFont({ weight: 'normal' });
-			};
+		// this.primary_text.attr({alpha: 1}); // More hackery.
+		if (!this.primary_text.has("AnimatedText")) {
+			this.primary_text.addComponent("AnimatedText").animate(this.primary_text.text());
 		};
-		this.previous_text_height = 0;
+		this.one("TextAnimationComplete", function(){
+			console.log(`Previous text height: ${this.previous_text_height}`);
+			// Display selectable options.
+			for(var i = 0; i < this.selection_text_array.length; i++){
+				this.selection_text_array[i].attr({
+				h: this.selection_text_array[i]._element.scrollHeight,
+				y: this.previous_text_height,
+				alpha: 1,
+				});
+				this.previous_text_height += this.selection_text_array[i].h;
+				if(i === this.selection_current){
+					this.selection_text_array[i].textColor('green');//.textFont({ weight: 'bold' });
+					this.cursor.x = this.selection_text_array[i].x - 10;
+					this.cursor.y = this.selection_text_array[i].y;
+				} else {
+					this.selection_text_array[i].textColor('white').textFont({ weight: 'normal' });
+				};
+			};
+			this.previous_text_height = 0;
+		});
 	},
 	
 	centerText: function() {
@@ -154,7 +185,6 @@ Crafty.c("Menu", {
 	setLayout: function(layout_index) {
 		// Set current layout
 		// TODO: Simplify this.
-		// this.current_layout = this.default_layouts[layout_index];
 		this.current_layout = TOT.DATA.MENU_LAYOUTS.DEFAULT_LAYOUTS[layout_index];
 		this.temp_viewport_object = new Object();
 		this.temp_viewport_object._x = Crafty.viewport.rect_object._x;
@@ -212,14 +242,13 @@ Crafty.c("Menu", {
 		this.primary_text = Crafty.e("2D, DOM, Text")
 			.text(this.dialog_tree[next_index].challenge_text).textColor('white')
 			.attr( { x: this.current_layout.text_x, y: this.primaryTextY, w: 200, alpha: 0} );
+		this.attach(this.primary_text);
 		this.primary_text.one("PostRender", function(){
 			this._parent.primary_text_height += this._element.scrollHeight;
 		});
 		
-		this.attach(this.primary_text);
-		
 		// Display selectable options.
-		this.loadSelectionText(this.dialog_tree[next_index].selections);
+		this.loadSelectionText(this.dialog_tree[next_index].selections)
 	},
 });
 
