@@ -38,17 +38,6 @@ Crafty.c("AnimatedText", {
 	
 });
 
-Crafty.c("LoadChecker", {
-	init: function(){
-		this.bind("PreRender", function() {
-			console.log("PRE-RENDERING A THING!");
-		});
-		document.getElementById(this.getDomId()).onload = function(){
-			console.log("ELEMENT LOADED!");
-		};
-	},
-});
-
 // TODO: Refactor the shit out of this.
 Crafty.c("Selectionable", {
 	SELECTION_UP: Crafty.keys.UP_ARROW,
@@ -202,7 +191,10 @@ Crafty.c("Menu", {
 		return this;
 	},
 	
+	// TODO: Make it dynamically place multiple sprites based on sprites_array length.
 	loadSprites: function(sprites_array) {
+		this.num_sprites = sprites_array.length;
+		
 		for(var i = 0; i < sprites_array.length; i++) {
 			this.temp_x = this.current_layout.sprite_x - (sprites_array[i].tile / 2);
 			this.temp_y = this.current_layout.sprite_y - (sprites_array[i].tileh / 2);
