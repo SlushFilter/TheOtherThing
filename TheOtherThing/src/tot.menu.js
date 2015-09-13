@@ -192,15 +192,21 @@ Crafty.c("Menu", {
 	},
 	
 	// TODO: Make it dynamically place multiple sprites based on sprites_array length.
+	// Maybe this should be moved to a separate component.
+	// Bug: This will break if the sprites are too large.
 	loadSprites: function(sprites_array) {
 		this.num_sprites = sprites_array.length;
 		
+		this.sprite_column_width = Crafty.viewport.width / this.num_sprites;
+		this.sprite_x_padding = this.sprite_column_width / 2;
+		
 		for(var i = 0; i < sprites_array.length; i++) {
-			this.temp_x = this.current_layout.sprite_x - (sprites_array[i].tile / 2);
+			this.temp_x = Crafty.viewport.rect_object._x + (this.sprite_column_width * i) + this.sprite_x_padding - (sprites_array[i].tile / 2);
+			// this.temp_x = this.current_layout.sprite_x - (sprites_array[i].tile / 2);
 			this.temp_y = this.current_layout.sprite_y - (sprites_array[i].tileh / 2);
 			this.attach(Crafty.e("2D, DOM").attr({x: this.temp_x, y: this.temp_y}).addComponent(Object.keys(sprites_array[i].map)));
 		};
-		
+		return this;
 	},
 	
 	loadDialog: function(dialogArray) {
@@ -342,6 +348,7 @@ Crafty.c("MenuBackground", {
 				this.attach(Crafty.e("MenuSprite").placeSprite(this.x + (x * this.sprite_width) - this.ofsX, this.y + (y * this.sprite_height) - this.ofsY, this.sprite_list_2d[this.current_sprite_y][this.current_sprite_x]));
 			};
 		};
+		return this;
 	},
 });
 
