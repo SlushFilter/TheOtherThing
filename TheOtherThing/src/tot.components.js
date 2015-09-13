@@ -551,8 +551,8 @@ Crafty.c("FloorTile", {
 		this.addComponent("2D, Canvas, Color, GfxBackground");
 	},
 	setTile : function(tileIndex) {
-		var x = tileIndex % 20; // 640 / 32
-		var y = (tileIndex / 20) | 0; // 640 / 32
+		var x = tileIndex % 16; // 640 / 32
+		var y = (tileIndex / 16) | 0; // 640 / 32
 		this.sprite(x, y);
 		return this;
 	}

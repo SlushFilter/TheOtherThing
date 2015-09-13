@@ -1,3 +1,93 @@
+// For local testing, run chrome with the --allow-file-access-from-files switch.
+TOT.MAP = {
+	TILE_WIDTH : 32,
+	TILE_HEIGHT : 32,
+	mapCanvas : null,
+	
+	load : function(imgUrl) {
+		if(this.mapCanvas === null) {
+			this.mapCanvas = document.createElement("canvas");
+			this.mapCanvas.width = 256;
+			this.mapCanvas.height = 256;
+		}
+		var img = this.loadImage(imgUrl, function() {
+			// Image onload callback.
+			var map = TOT.MAP.getMapData(this, TOT.MAP.mapCanvas);
+			TOT.MAP.buildMap(map);
+			Crafty.trigger("MapLoaded");
+		});
+	},
+	
+	loadImage : function(imgUrl, onloadCallback) {
+		img = new Image();
+		img.src = imgUrl;
+		img.onload = onloadCallback;
+		return img;
+	},
+	
+	getMapData : function(img, canvas) {
+		var ctx = canvas.getContext("2d");
+		ctx.drawImage(img, 0, 0, img.width, img.height);
+		var d = ctx.getImageData(0, 0, img.width, img.height);
+		
+		var w = d.width;
+		var h = d.height;
+		var s = w * h;
+		var bg = new Uint8Array(s); // Background
+		var pf = new Uint8Array(s); // Playfield
+		var ol = new Uint8Array(s); // Overlay
+		var at = new Uint8Array(s); // Attributes
+		
+		var len = d.data.length;
+		var di = 0;
+		
+		for(var si = 0; si < len;) {
+			bg[di] = d.data[si++];
+			pf[di] = d.data[si++];
+			ol[di] = d.data[si++];
+			at[di++] = d.data[si++]; 
+		}
+		return { width : w, height : h, size : s, 
+			bg: bg, pf : pf, ol : ol, at : at }
+	},
+	
+	buildMap : function(mapData) {
+		console.log(mapData);
+		var width = mapData.width;
+		var height = mapData.height;
+		var i = 0;
+		for(var y = 0; y < height; y++) {
+			for(var x = 0; x < width; x++) 
+			{
+				//this.placeBackground(mapData.bg[i], x, y);
+				//this.placePlayfield(mapData.pf[i], x, y);
+				this.placeOverlay(mapData.ol[i], x, y);
+				i++;
+			}
+		}
+	},
+	place : function(ent, x, y) {
+		ent.x = x * this.TILE_WIDTH;
+		ent.y = y * this.TILE_HEIGHT;
+	},
+	placeBackground : function(tIndex, x, y) {
+		console.log("TILE PLACED");
+		if(!tIndex) { return; }
+		this.place(Crafty.e("FloorTile, tileset").setTile(tIndex), x, y);
+	},
+	placePlayfield : function(tIndex, x, y) {
+		if(!tIndex) { return; }
+		this.place(Crafty.e("FloorTile, tileset").setTile(tIndex), x, y);
+
+	},
+	placeOverlay : function(tIndex, x, y) {
+		if(!tIndex) { return; }
+		this.place(Crafty.e("FloorTile, tileset").setTile(tIndex), x, y);
+	}
+	
+};
+
+/*
 // Level map placeholder.
 TOT.MAP.MAPOBJECTS = [
 	null, 
@@ -79,4 +169,4 @@ TOT.MAP.Mapper = {
 			}
 		}
 	}
-};
+};*/

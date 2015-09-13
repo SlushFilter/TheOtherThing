@@ -9,7 +9,8 @@ Crafty.defineScene("MainMenu", function() {
 // TODO: Create a factory that will load the info for each scene from TOT.DATA.MAP
 Crafty.defineScene("W1M1", function() {
 	// Scene contents
-	TOT.MAP.Mapper.loadMap(TOT.DATA.MAP.W1M1);
+	// TOT.MAP.Mapper.loadMap(TOT.DATA.MAP.W1M1);
+	TOT.MAP.load("gfx/testmap.png");
 	jonesy = Crafty.e("Player").attr({ x: 256, y: 256 }); 
 	Crafty.viewport.follow(jonesy, 0, 0);
 	//TOT.ENTS.CreateHud();
