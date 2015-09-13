@@ -194,6 +194,8 @@ Crafty.c("Menu", {
 	// TODO: Make it dynamically place multiple sprites based on sprites_array length.
 	// Maybe this should be moved to a separate component.
 	// Bug: This will break if the sprites are too large.
+	// Bug: this only works for horizontal menu layouts.
+	// TODO: Move this to the menu_layout object.
 	loadSprites: function(sprites_array) {
 		this.num_sprites = sprites_array.length;
 		
