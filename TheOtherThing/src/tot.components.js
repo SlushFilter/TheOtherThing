@@ -349,8 +349,6 @@ Crafty.c("Mobile", {
 		this.bind("MobMove", this._mobileHandleMobMove);
         this.bind("MobStop", this._mobileHandleMobStop);
 	} ,
-    _mobileHandleMobStop : function() {
-    } ,
     // Handle a MobMove command
     _mobileHandleMobMove : function(data) {
         // Update the move registers.
@@ -487,6 +485,8 @@ Crafty.c("KeyboardControl", {
 // aiToggle - toggles the ai think function on and off
 // aiSetInterval - Sets how often the think function fires (in milliseconds)
 // aiSetThink - Sets the think routine of the ai.
+// aiGetThink - Gets the current AI routine callback.
+
 Crafty.c("AI", {
     _aiSuspend : false, // Suspended flag
     _aiInterval : 1000, // Interval to reset to
@@ -508,21 +508,31 @@ Crafty.c("AI", {
     } ,
     aiSetThink : function(thinkFunction) {
         this._aiThink = thinkFunction;
+		if(this._aiThink === null) {
+			this.aiSuspend();
+		} else {
+			this.aiResume();
+		}
     } ,
+	aiGetThink : function() {
+		return this._aiThink;
+	} ,
     aiToggle : function() {
-        this._aiSuspend = !_aiSuspend;
+        this._aiSuspend = !this._aiSuspend;
         if(this._aiSuspend === false) {
-            this.unbind("EnterFrame", this._aiFrameCallback);
-        } else {
             this.bind("EnterFrame", this._aiFrameCallback);
+        } else {
+            this.unbind("EnterFrame", this._aiFrameCallback);
         }
     } ,
     aiSuspend : function() {
         if(this._aiSuspend === true) { return; }
+		console.log("AI SUSPEND");
         this.aiToggle();
     } ,
     aiResume : function() {
         if(this._aiSuspend === false) { return; }
+		console.log("AI RESUME");
         this.aiToggle();
     }
 });
@@ -551,8 +561,8 @@ Crafty.c("FloorTile", {
 		this.addComponent("2D, Canvas, Color, GfxBackground");
 	},
 	setTile : function(tileIndex) {
-		var x = tileIndex % 16; // 640 / 32
-		var y = (tileIndex / 16) | 0; // 640 / 32
+		var x = tileIndex % 16; // 640 / 16
+		var y = (tileIndex / 16) | 0; // 640 / 16
 		this.sprite(x, y);
 		return this;
 	}
@@ -563,8 +573,20 @@ Crafty.c("OverlayTile", {
 		this.addComponent("2D, Canvas, Color, GfxOverlay");
 	},
 	setTile : function(tileIndex) {
-		var x = tileIndex % 20; // 640 / 32
-		var y = (tileIndex / 20) | 0; // 640 / 32
+		var x = tileIndex % 16; // 640 / 16
+		var y = (tileIndex / 16) | 0; // 640 / 16
+		this.sprite(x, y);
+		return this;
+	}
+});
+
+Crafty.c("PlayfieldTile", {
+	init: function() {
+		this.addComponent("2D, Canvas, Color, GfxPlayfield");
+	},
+	setTile : function(tileIndex) {
+		var x = tileIndex % 16; // 640 / 16
+		var y = (tileIndex / 16) | 0; // 640 / 16
 		this.sprite(x, y);
 		return this;
 	}
@@ -616,6 +638,48 @@ Crafty.c("AI_Wander", {
 		}
 	}
 });
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// AI_WalkTo
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// (Untested)
+Crafty.c("AI_WalkTo", {
+	_walkToNode : null,
+	_walkToSaveAI : null,
+	init: function() {
+		this.requires("AI, Mobile");
+		this.bind("WalkTo", this._AI_EnterWalkTo);
+	} ,
+	
+	_AI_EnterWalkTo: function(node) {
+		if(!node) { return; }
+		this._walkToSaveAI = this.aiGetThink();
+		this._walkToNode = node;
+		this.aiSetThink(this._AI_WalkTo);
+		
+		// Point this ent in the right direction and start walking.
+		this.vel.x = node.x - this.x;
+		this.vel.y = node.y - this.y;
+		this.vel.normalize();
+		this.vel.scale(this.mobileSpeed);
+	} ,
+	
+	_AI_WalkTo: function() {
+		if(!this._walkToNode) { this.setThink(this._walkToSaveAI); }
+		// Are we there yet ?
+		// Quick and dirty - update this to look for axis crossings.
+		if(this.contains(this._walkToNode.x, this._walkToNode.y, 1, 1) === true) {
+			this._AI_ExitWalkTo();
+			return;
+		}
+	} ,
+	_AI_ExitWalkTo: function() {
+		console.log("IM HERE!");
+		this.trigger("MobStop");
+		this.aiSetThink(this._walkToSaveAI);
+		this._walkToSaveAI = null;
+	}
+	
+});
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // AI_Patrol
@@ -633,23 +697,25 @@ Crafty.c("AI_Patrol", {
 	init: function() {
 		this.requires("AI, Mobile");
         this.aiSetThink(this._AI_Patrol);
+		this.aiSetInterval(40);
 		this._patrolWaypoints = [];
 	},
 	
 	_AI_Patrol: function() {
 		var wx, wy; // waypoint coords.
-		
-		if(_patrolWaypoints.length === 0) {
+		console.log("Patroling");
+		if(this._patrolWaypoints.length === 0) {
 				console.log("AI_Patrol : No waypoints!"); 
 				return;
 			}
-		wx = this._patrolWaypoints[_patrolIndex][0];
-		wy = this._patrolWaypoints[_patrolIndex][1];
+		wx = this._patrolWaypoints[this._patrolIndex].x;
+		wy = this._patrolWaypoints[this._patrolIndex].y;
 		// Are we there yet ?
 		if(this.contains(wx, wy, 1, 1) === true) {
 			this._patrolNextWaypoint();
-			wx = this._patrolWaypoints[_patrolIndex][0];
-			wy = this._patrolWaypoints[_patrolIndex][1];
+			console.log("Waypoint : " + this._patrolIndex);
+			wx = this._patrolWaypoints[this._patrolIndex].x;
+			wy = this._patrolWaypoints[this._patrolIndex].y;
 		}
 		// Adjust our heading (if needed)
 		this.vel.x = wx - this.x;

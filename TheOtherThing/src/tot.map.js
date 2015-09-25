@@ -1,7 +1,7 @@
 // For local testing, run chrome with the --allow-file-access-from-files switch.
 TOT.MAP = {
-	TILE_WIDTH : 32,
-	TILE_HEIGHT : 32,
+	TILE_WIDTH : 16,
+	TILE_HEIGHT : 16,
 	mapCanvas : null,
 	
 	load : function(imgUrl) {
@@ -42,9 +42,9 @@ TOT.MAP = {
 		var di = 0;
 		
 		for(var si = 0; si < len;) {
-			bg[di] = d.data[si++];
-			pf[di] = d.data[si++];
-			ol[di] = d.data[si++];
+			bg[di] = d.data[si++] - 1;
+			pf[di] = d.data[si++] - 1;
+			ol[di] = d.data[si++] - 1;
 			at[di++] = d.data[si++]; 
 		}
 		return { width : w, height : h, size : s, 
@@ -52,15 +52,14 @@ TOT.MAP = {
 	},
 	
 	buildMap : function(mapData) {
-		console.log(mapData);
 		var width = mapData.width;
 		var height = mapData.height;
 		var i = 0;
 		for(var y = 0; y < height; y++) {
 			for(var x = 0; x < width; x++) 
 			{
-				//this.placeBackground(mapData.bg[i], x, y);
-				//this.placePlayfield(mapData.pf[i], x, y);
+				this.placeBackground(mapData.bg[i], x, y);
+				this.placePlayfield(mapData.pf[i], x, y);
 				this.placeOverlay(mapData.ol[i], x, y);
 				i++;
 			}
@@ -71,20 +70,35 @@ TOT.MAP = {
 		ent.y = y * this.TILE_HEIGHT;
 	},
 	placeBackground : function(tIndex, x, y) {
-		console.log("TILE PLACED");
-		if(!tIndex) { return; }
+		if(tIndex === 255) { return; }
 		this.place(Crafty.e("FloorTile, tileset").setTile(tIndex), x, y);
 	},
 	placePlayfield : function(tIndex, x, y) {
-		if(!tIndex) { return; }
-		this.place(Crafty.e("FloorTile, tileset").setTile(tIndex), x, y);
+		if(tIndex === 255) { return; }
+		this.place(Crafty.e("PlayfieldTile, tileset").setTile(tIndex), x, y);
 
 	},
 	placeOverlay : function(tIndex, x, y) {
-		if(!tIndex) { return; }
-		this.place(Crafty.e("FloorTile, tileset").setTile(tIndex), x, y);
+		if(tIndex === 255) { return; }
+		this.place(Crafty.e("OverlayTile, tileset").setTile(tIndex), x, y);
 	}
-	
+};
+
+TOT.MAP.PATH = [
+	{ x: 64, y: 64 },
+	{ x: 128, y: 64 },
+	{ x: 128, y: 128 },
+	{ x: 64, y: 128 }
+];
+
+TOT.MAP.TESTPATROL = function(ent) {
+	ent.addComponent("AI_Patrol");
+	ent.aiSuspend();
+	for(var i = 0; i < TOT.MAP.PATH.length; i++) {
+		ent.patrolAddWaypoint(TOT.MAP.PATH[i]);
+		console.log(TOT.MAP.PATH[i]);
+	}
+	ent.aiResume();
 };
 
 /*

@@ -20,8 +20,8 @@ TOT.DATA.SPRITEDEF = {
 			map : { jones_default : [0, 0] }
 		},
 		"labtiles.png" : {
-			tile : 32,
-			tileh : 32,
+			tile : 16,
+			tileh : 16,
 			map : { tileset : [0, 0] }
 		},
 		"temp_human.png" : {
