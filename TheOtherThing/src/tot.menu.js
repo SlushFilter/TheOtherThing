@@ -29,7 +29,7 @@ Crafty.c("AnimatedText", {
 				this.time_elapsed = 0;
 				this.substring_len = 0;
 				this.unbind("EnterFrame");
-				this._parent.trigger("TextAnimationComplete");
+				this.trigger("TextAnimationComplete");
 				// console.log("Text animation complete!");
 			};
 		});

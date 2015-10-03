@@ -27,3 +27,11 @@ Dialog system requirements:
 	- Must be able to execute methods within loaded dialog objects.
 	- Add boolean so that certain dialog paths can be made available only to certain NPCs/situations
 		- Add setter / getter to Selection object for "isEnabled" state.
+
+
+
+For menu background:
+	- Currently background is composed of multiple "child" Crafty entities, each of which holds a sprite for a portion of the background.
+		- Change this to draw all the sprites to a hidden canvas.
+		- Then direct the DOM backgroundImage to the canvas:
+			entity._element.style.backgroundImage = "url(" + canvasName.toDataURL("image/png") + ")"
