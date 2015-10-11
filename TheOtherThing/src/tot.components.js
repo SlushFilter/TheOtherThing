@@ -89,16 +89,26 @@ Crafty.c("GfxPlayfield", {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Defines a scannable hitbox - Generally this should be used to define an 
 // entity's size in the game.
+// the values cx and cy serve as getters/setters to manipulate the hitbox
+// coordinates calculated from the center.
 Crafty.c("HitBox", {
-	init: function() { this.requires("2D"); } ,
+	init: function() { 
+		this.requires("2D");
+		// Define getters/setters for center of hitbox.
+		Object.defineProperty(this, "cx", {
+			get: function() { return this.x + (this.w / 2); },
+			set: function(v) { this.x = v - (this.w / 2); }
+		});
+		Object.defineProperty(this, "cy", {
+			get: function() { return this.y + (this.h / 2); },
+			set: function(v) { this.y = v - (this.h / 2); }
+		});
+		
+	} ,
 	setHitBox: function(width, height) {
 		this.w = width;
 		this.h = height;
 	},
-	// Returns a coordinate at the center of mass as an array [x, y]
-	getCenter: function() {
-		return [this.x + (this.w / 2), this.y + (this.h / 2)];
-	}
 });
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -270,7 +280,7 @@ Crafty.c("Actor", {
 		// Fetch a list of all 'Actionable' entities
 		var actors = Crafty("Actionable");
 		var ent = null;
-		console.log(actors.length);
+		//console.log(actors.length);
 		for(var i = 0; i < actors.length; i++) {
 			ent = Crafty(actors[i]);
 			// Never ever actualize yourself.
@@ -527,12 +537,12 @@ Crafty.c("AI", {
     } ,
     aiSuspend : function() {
         if(this._aiSuspend === true) { return; }
-		console.log("AI SUSPEND");
+		//console.log("AI SUSPEND");
         this.aiToggle();
     } ,
     aiResume : function() {
         if(this._aiSuspend === false) { return; }
-		console.log("AI RESUME");
+		//console.log("AI RESUME");
         this.aiToggle();
     }
 });
@@ -644,10 +654,12 @@ Crafty.c("AI_Wander", {
 // (Untested)
 Crafty.c("AI_WalkTo", {
 	_walkToNode : null,
+	_walkToNodeDir : null,
 	_walkToSaveAI : null,
 	init: function() {
 		this.requires("AI, Mobile");
 		this.bind("WalkTo", this._AI_EnterWalkTo);
+		this._walkToNodeDir = { x:false, y:true };
 	} ,
 	
 	_AI_EnterWalkTo: function(node) {
@@ -657,8 +669,17 @@ Crafty.c("AI_WalkTo", {
 		this.aiSetThink(this._AI_WalkTo);
 		
 		// Point this ent in the right direction and start walking.
-		this.vel.x = node.x - this.x;
-		this.vel.y = node.y - this.y;
+		
+		this.vel.x = node.x - this.cx;
+		// false : node is to the left
+		// true : node is to the right
+		this._walkToNodeDir.x = (this.vel.x > 0); 
+		
+		this.vel.y = node.y - this.cy;
+		// false : node is to the north
+		// true : node is to the south
+		this._walkToNodeDir.y = (this.vel.y > 0);
+		
 		this.vel.normalize();
 		this.vel.scale(this.mobileSpeed);
 	} ,
@@ -666,14 +687,36 @@ Crafty.c("AI_WalkTo", {
 	_AI_WalkTo: function() {
 		if(!this._walkToNode) { this.setThink(this._walkToSaveAI); }
 		// Are we there yet ?
-		// Quick and dirty - update this to look for axis crossings.
-		if(this.contains(this._walkToNode.x, this._walkToNode.y, 1, 1) === true) {
+		var arrived = true;
+		
+		if(this._walkToNode.x !== this.cx) {
+			// Check X axis - If the tests are equal, then we crossed the axis.
+			if((this._walkToNode.x - this.cx) < 0 === this._walkToNodeDir.x) {
+				// snap to node axis
+				this.cx = this._walkToNode.x;
+				// Stop x axis moviment
+				this.vel.x = 0;
+			} else {
+				arrived = false;
+			}
+		}
+		if(this._walkToNode.y !== this.cy) {
+			// Check Y axis - If the tests are equal, then we crossed the axis.
+			if((this._walkToNode.y - this.cy) < 0 === this._walkToNodeDir.y) {
+				// snap to node axis
+				this.cy = this._walkToNode.y;
+				// Stop y axis moviment
+				this.vel.y = 0;
+			} else {
+				arrived = false;
+			}
+		}
+		if(arrived === true) {
 			this._AI_ExitWalkTo();
 			return;
 		}
 	} ,
 	_AI_ExitWalkTo: function() {
-		console.log("IM HERE!");
 		this.trigger("MobStop");
 		this.aiSetThink(this._walkToSaveAI);
 		this._walkToSaveAI = null;
@@ -695,19 +738,21 @@ Crafty.c("AI_Patrol", {
 	_patrolIndex: 0,
 	
 	init: function() {
-		this.requires("AI, Mobile");
+		this.requires("AI, AI_WalkTo, Mobile");
         this.aiSetThink(this._AI_Patrol);
 		this.aiSetInterval(40);
 		this._patrolWaypoints = [];
 	},
 	
 	_AI_Patrol: function() {
-		var wx, wy; // waypoint coords.
-		console.log("Patroling");
 		if(this._patrolWaypoints.length === 0) {
 				console.log("AI_Patrol : No waypoints!"); 
 				return;
-			}
+		}
+		this.trigger("WalkTo", this._patrolWaypoints[this._patrolIndex]);
+		this._patrolNextWaypoint();
+		/* OLD CODE ------------------------------------------------------------
+		var wx, wy; // waypoint coords.
 		wx = this._patrolWaypoints[this._patrolIndex].x;
 		wy = this._patrolWaypoints[this._patrolIndex].y;
 		// Are we there yet ?
@@ -736,7 +781,7 @@ Crafty.c("AI_Patrol", {
 			} else { // moving down
 				bearing = TOT.CONST.BEARING.DOWN;
 			}
-		}
+		}*/
 	},
 	_patrolNextWaypoint: function() {
 		this._patrolIndex = (this._patrolIndex + 1) % this._patrolWaypoints.length;
